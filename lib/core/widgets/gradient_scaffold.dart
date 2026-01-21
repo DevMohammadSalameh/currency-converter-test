@@ -20,12 +20,18 @@ class GradientScaffold extends StatelessWidget {
     this.extendBodyBehindAppBar = false,
   });
 
-  static const Color topColor = Color(0xFFD8E0F5);
-  // static const Color topColor = Color(0xFFC1D2FF);
-  static const Color bottomColor = Color(0xFFFFFAFA);
-
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final topColor = isDark
+        ? colorScheme.surfaceContainerHighest
+        : const Color(0xFFD8E0F5);
+    final bottomColor = isDark
+        ? colorScheme.surface
+        : const Color(0xFFFFFAFA);
+
     return Scaffold(
       extendBodyBehindAppBar: extendBodyBehindAppBar,
       appBar: appBar,
@@ -33,11 +39,10 @@ class GradientScaffold extends StatelessWidget {
       floatingActionButtonLocation: floatingActionButtonLocation,
       bottomNavigationBar: bottomNavigationBar,
       drawer: drawer,
-
       body: LayoutBuilder(
         builder: (context, constraints) => Container(
           height: constraints.maxHeight,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,

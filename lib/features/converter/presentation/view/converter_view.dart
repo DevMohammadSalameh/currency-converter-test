@@ -1,6 +1,6 @@
 import 'package:currency_converter/features/converter/presentation/widgets/currencies_list.dart';
 import 'package:currency_converter/features/converter/presentation/widgets/custom_numpad.dart';
-import 'package:currency_converter/features/history/presentation/view/history_view.dart';
+import 'package:currency_converter/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -43,8 +43,13 @@ class _ConverterViewState extends State<ConverterView> {
         elevation: 0,
         toolbarHeight: 90,
         leading: IconButton(
-          icon: const Icon(Icons.person_outline),
-          onPressed: () => _showSnackBar(context),
+          icon: Icon(
+            ThemeProvider.of(context).isDarkMode
+                ? Icons.light_mode_outlined
+                : Icons.dark_mode_outlined,
+          ),
+          onPressed: () => ThemeProvider.of(context).toggleTheme(),
+          tooltip: 'Toggle theme',
         ),
         actions: [
           IconButton(
@@ -129,24 +134,25 @@ class _ConverterViewState extends State<ConverterView> {
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(
+                                      Icon(
                                         Icons.access_time,
                                         size: 16,
-                                        color: Colors.grey,
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
                                         'Last Time Updated: ${_formatTime(state.lastUpdated!)}',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 12,
-                                          color: Colors.grey,
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                                         ),
                                       ),
                                       const SizedBox(width: 8),
                                       // Data Source Icon
                                       if (state.dataSource != null)
                                         Tooltip(
-                                          message: state.dataSource == DataSource.api
+                                          message:
+                                              state.dataSource == DataSource.api
                                               ? 'Fetched from API'
                                               : 'Loaded from local database',
                                           child: Icon(
@@ -154,9 +160,11 @@ class _ConverterViewState extends State<ConverterView> {
                                                 ? Icons.cloud_download
                                                 : Icons.storage,
                                             size: 16,
-                                            color: state.dataSource == DataSource.api
-                                                ? Colors.blue
-                                                : Colors.green,
+                                            color:
+                                                state.dataSource ==
+                                                    DataSource.api
+                                                ? Theme.of(context).colorScheme.primary
+                                                : Theme.of(context).colorScheme.tertiary,
                                           ),
                                         ),
                                     ],
@@ -169,7 +177,9 @@ class _ConverterViewState extends State<ConverterView> {
                                   Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(32),
-                                      color: Theme.of(context).colorScheme.primary
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary
                                           .withValues(alpha: 0.1),
                                     ),
                                     child: TextButton.icon(
@@ -180,19 +190,20 @@ class _ConverterViewState extends State<ConverterView> {
                                       ),
                                       onPressed: state.isEditingRate
                                           ? null
-                                          : () =>
-                                                _navigateToCurrencyList(context),
+                                          : () => _navigateToCurrencyList(
+                                              context,
+                                            ),
                                       icon: const Icon(Icons.add),
                                       label: const Text('Add'),
                                     ),
                                   ),
                                   const Spacer(),
                                   // Info Text
-                                  const Text(
+                                  Text(
                                     'Click to view usage guide',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.grey,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                   // Info Button
@@ -221,7 +232,7 @@ class _ConverterViewState extends State<ConverterView> {
                       );
                     },
                     child: Container(
-                      color: Colors.black.withValues(alpha: 0.3),
+                      color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.3),
                     ),
                   ),
                 ),
@@ -268,16 +279,6 @@ class _ConverterViewState extends State<ConverterView> {
     bloc.add(const ForceRefreshCurrencies());
   }
 
-  void _showSnackBar(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'This feature is not implemented yet, Hire me to see the full app',
-        ),
-      ),
-    );
-  }
-
   void _showInfoSnackBar(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -312,24 +313,32 @@ class _ConverterViewState extends State<ConverterView> {
   }
 
   void _navigateToHistory(BuildContext context) {
-    final converterState = context.read<CurrenciesConverterBloc>().state;
-
-    if (converterState.fromCurrency == null ||
-        converterState.toCurrency == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select both currencies first')),
-      );
-      return;
-    }
-
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => HistoryView(
-          fromCurrency: converterState.fromCurrency!,
-          toCurrency: converterState.toCurrency!,
-        ),
+    //temp
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('History is not implemented, becuse of API limitations'),
       ),
     );
+    return;
+    //
+    // final converterState = context.read<CurrenciesConverterBloc>().state;
+
+    // if (converterState.fromCurrency == null ||
+    //     converterState.toCurrency == null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(content: Text('Please select both currencies first')),
+    //   );
+    //   return;
+    // }
+
+    // Navigator.of(context).push(
+    //   MaterialPageRoute(
+    //     builder: (_) => HistoryView(
+    //       fromCurrency: converterState.fromCurrency!,
+    //       toCurrency: converterState.toCurrency!,
+    //     ),
+    //   ),
+    // );
   }
 
   String _formatTime(DateTime time) {

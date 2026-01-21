@@ -49,7 +49,12 @@ class _RefreshConfirmationDialogState extends State<RefreshConfirmationDialog> {
                 child: FilledButton(
                   onPressed: () => Navigator.of(context).pop(null),
                   style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(Colors.grey),
+                    backgroundColor: WidgetStatePropertyAll(
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
+                    ),
+                    foregroundColor: WidgetStatePropertyAll(
+                      Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   child: const Text('Cancel'),
                 ),

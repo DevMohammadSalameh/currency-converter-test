@@ -74,57 +74,64 @@ class CurrencySelector extends StatelessWidget {
   }
 
   Widget _buildFlag() {
-    if (selectedCurrency == null) {
-      return Container(
-        width: 48,
-        height: 36,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: const Icon(Icons.currency_exchange, color: Colors.grey),
-      );
-    }
+    return Builder(
+      builder: (context) {
+        final placeholderColor = Theme.of(context).colorScheme.surfaceContainerHighest;
+        final iconColor = Theme.of(context).colorScheme.onSurfaceVariant;
 
-    final flagUrl = selectedCurrency!.flagUrl;
-    if (flagUrl.isEmpty) {
-      return Container(
-        width: 48,
-        height: 36,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Center(
-          child: Text(
-            selectedCurrency!.id.substring(0, 2),
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-      );
-    }
+        if (selectedCurrency == null) {
+          return Container(
+            width: 48,
+            height: 36,
+            decoration: BoxDecoration(
+              color: placeholderColor,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Icon(Icons.currency_exchange, color: iconColor),
+          );
+        }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(4),
-      child: CachedNetworkImage(
-        imageUrl: flagUrl,
-        width: 48,
-        height: 36,
-        fit: BoxFit.cover,
-        placeholder: (context, url) =>
-            Container(width: 48, height: 36, color: Colors.grey[300]),
-        errorWidget: (context, url, error) => Container(
-          width: 48,
-          height: 36,
-          color: Colors.grey[300],
-          child: Center(
-            child: Text(
-              selectedCurrency!.id.substring(0, 2),
-              style: const TextStyle(fontWeight: FontWeight.bold),
+        final flagUrl = selectedCurrency!.flagUrl;
+        if (flagUrl.isEmpty) {
+          return Container(
+            width: 48,
+            height: 36,
+            decoration: BoxDecoration(
+              color: placeholderColor,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Center(
+              child: Text(
+                selectedCurrency!.id.substring(0, 2),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          );
+        }
+
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: CachedNetworkImage(
+            imageUrl: flagUrl,
+            width: 48,
+            height: 36,
+            fit: BoxFit.cover,
+            placeholder: (context, url) =>
+                Container(width: 48, height: 36, color: placeholderColor),
+            errorWidget: (context, url, error) => Container(
+              width: 48,
+              height: 36,
+              color: placeholderColor,
+              child: Center(
+                child: Text(
+                  selectedCurrency!.id.substring(0, 2),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

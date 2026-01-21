@@ -98,17 +98,19 @@ class _DismissibleCurrencyItem extends StatelessWidget {
     return Dismissible(
       key: ValueKey('dismissible_${currency.id}'),
       direction: DismissDirection.endToStart,
-      background: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        decoration: BoxDecoration(
-          color: Colors.red,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Icon(
-          Icons.delete,
-          color: Colors.white,
+      background: Builder(
+        builder: (context) => Container(
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.error,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          child: Icon(
+            Icons.delete,
+            color: Theme.of(context).colorScheme.onError,
+          ),
         ),
       ),
       onDismissed: (_) {

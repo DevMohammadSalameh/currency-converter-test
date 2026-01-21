@@ -37,10 +37,7 @@ class CurrencyListView extends StatelessWidget {
         builder: (context, state) {
           return Column(
             children: [
-              const ColoredBox(
-                color: Colors.green,
-                child: SizedBox(height: 80),
-              ),
+              const SizedBox(height: 80),
               CurrencySearchBar(
                 onChanged: (query) {
                   context.read<CurrenciesConverterBloc>().add(
@@ -70,7 +67,7 @@ class CurrencyListView extends StatelessWidget {
 
     if (state.isCurrencyListLoaded) {
       if (state.filteredCurrencies.isEmpty) {
-        return _buildEmptyWidget(state.searchQuery);
+        return _buildEmptyWidget(context, state.searchQuery);
       }
       return _buildCurrencyList(context, state);
     }
@@ -146,14 +143,18 @@ class CurrencyListView extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyWidget(String searchQuery) {
+  Widget _buildEmptyWidget(BuildContext context, String searchQuery) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.search_off, size: 64, color: Colors.grey),
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(height: 16),
             Text(
               searchQuery.isNotEmpty

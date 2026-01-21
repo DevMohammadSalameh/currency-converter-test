@@ -88,35 +88,39 @@ class CurrencyListTile extends StatelessWidget {
   }
 
   Widget _buildPlaceholder() {
-    return Container(
-      width: 40,
-      height: 30,
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: const Center(
-        child: SizedBox(
-          width: 16,
-          height: 16,
-          child: CircularProgressIndicator(strokeWidth: 2),
+    return Builder(
+      builder: (context) => Container(
+        width: 40,
+        height: 30,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: const Center(
+          child: SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildFallbackFlag() {
-    return Container(
-      width: 40,
-      height: 30,
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Center(
-        child: Text(
-          currency.id.length >= 2 ? currency.id.substring(0, 2) : currency.id,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+    return Builder(
+      builder: (context) => Container(
+        width: 40,
+        height: 30,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Center(
+          child: Text(
+            currency.id.length >= 2 ? currency.id.substring(0, 2) : currency.id,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          ),
         ),
       ),
     );

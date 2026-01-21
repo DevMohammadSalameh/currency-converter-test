@@ -40,12 +40,12 @@ class CurrencyListItem extends StatelessWidget {
           boxShadow: [
             if (isSelected)
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
+                color: Theme.of(context).shadowColor.withValues(alpha: 0.2),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
           ],
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isSelected
@@ -125,7 +125,10 @@ class CurrencyListItem extends StatelessWidget {
         if (_showConversionText) ...[
           Text(
             _buildConversionText(),
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ],

@@ -43,7 +43,7 @@ class _CurrencySearchBarState extends State<CurrencySearchBar> {
                 )
               : null,
           filled: true,
-          fillColor: Colors.white60,
+          fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.8),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
