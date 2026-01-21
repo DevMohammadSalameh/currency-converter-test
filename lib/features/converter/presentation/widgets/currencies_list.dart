@@ -15,7 +15,8 @@ class CurrenciesList extends StatelessWidget {
     return BlocBuilder<CurrenciesConverterBloc, CurrenciesConverterState>(
       buildWhen: (previous, current) =>
           previous.displayedCurrencies != current.displayedCurrencies ||
-          previous.selectedCurrency != current.selectedCurrency,
+          previous.selectedCurrency != current.selectedCurrency ||
+          previous.isEditingRate != current.isEditingRate,
       builder: (context, state) {
         final currencies = state.displayedCurrencies;
 
@@ -40,7 +41,9 @@ class CurrenciesList extends StatelessWidget {
             return _DismissibleCurrencyItem(
               key: ValueKey(currency.id),
               currency: currency,
-              isSelected: state.selectedCurrency == currency,
+              isSelected: state.selectedCurrency?.id == currency.id,
+              isEditing: state.isEditingRate,
+              selectedCurrency: state.selectedCurrency,
             );
           },
         );
@@ -54,10 +57,14 @@ class _DismissibleCurrencyItem extends StatelessWidget {
     super.key,
     required this.currency,
     required this.isSelected,
+    required this.isEditing,
+    this.selectedCurrency,
   });
 
   final Currency currency;
   final bool isSelected;
+  final bool isEditing;
+  final Currency? selectedCurrency;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +92,8 @@ class _DismissibleCurrencyItem extends StatelessWidget {
       child: CurrencyListItem(
         currency: currency,
         isSelected: isSelected,
+        isEditing: isEditing,
+        selectedCurrency: selectedCurrency,
       ),
     );
   }

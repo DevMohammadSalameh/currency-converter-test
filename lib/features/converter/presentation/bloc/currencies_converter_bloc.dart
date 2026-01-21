@@ -31,6 +31,14 @@ class CurrenciesConverterBloc
     on<SelectCurrency>(_onSelectCurrency);
     on<AddCurrencyToDisplayed>(_onAddCurrencyToDisplayed);
     on<RemoveCurrencyFromDisplayed>(_onRemoveCurrencyFromDisplayed);
+    // Rate editing events
+    on<StartEditingRate>(_onStartEditingRate);
+    on<CancelEditingRate>(_onCancelEditingRate);
+    on<NumpadDigitPressed>(_onNumpadDigitPressed);
+    on<NumpadOperationPressed>(_onNumpadOperationPressed);
+    on<NumpadClear>(_onNumpadClear);
+    on<NumpadDelete>(_onNumpadDelete);
+    on<ApplyRateChange>(_onApplyRateChange);
   }
 
   void _onSelectCurrency(
@@ -262,5 +270,185 @@ class CurrenciesConverterBloc
         clearError: true,
       ),
     );
+  }
+
+  // Rate editing handlers
+  void _onStartEditingRate(
+    StartEditingRate event,
+    Emitter<CurrenciesConverterState> emit,
+  ) {
+    if (state.selectedCurrency == null) return;
+
+    emit(state.copyWith(
+      isEditingRate: true,
+      editingRateValue: state.selectedCurrency!.rate.toString(),
+      clearCalculator: true,
+    ));
+  }
+
+  void _onCancelEditingRate(
+    CancelEditingRate event,
+    Emitter<CurrenciesConverterState> emit,
+  ) {
+    emit(state.copyWith(
+      isEditingRate: false,
+      editingRateValue: '',
+      clearCalculator: true,
+    ));
+  }
+
+  void _onNumpadDigitPressed(
+    NumpadDigitPressed event,
+    Emitter<CurrenciesConverterState> emit,
+  ) {
+    String currentValue = state.editingRateValue;
+
+    // Handle decimal point
+    if (event.digit == '.') {
+      if (currentValue.contains('.')) return; // Already has decimal
+      if (currentValue.isEmpty) {
+        currentValue = '0';
+      }
+    }
+
+    // Prevent leading zeros (except for decimal like "0.5")
+    if (currentValue == '0' && event.digit != '.') {
+      currentValue = '';
+    }
+
+    emit(state.copyWith(editingRateValue: currentValue + event.digit));
+  }
+
+  void _onNumpadOperationPressed(
+    NumpadOperationPressed event,
+    Emitter<CurrenciesConverterState> emit,
+  ) {
+    final currentValue = state.editingRateValue;
+    if (currentValue.isEmpty) return;
+
+    final currentNumber = double.tryParse(currentValue);
+    if (currentNumber == null) return;
+
+    // If there's already an operation pending, calculate first
+    if (state.calculatorFirstOperand != null &&
+        state.calculatorOperator != null) {
+      final result = _performCalculation(
+        state.calculatorFirstOperand!,
+        currentNumber,
+        state.calculatorOperator!,
+      );
+      emit(state.copyWith(
+        calculatorFirstOperand: result,
+        calculatorOperator: event.operation,
+        editingRateValue: '',
+      ));
+    } else {
+      emit(state.copyWith(
+        calculatorFirstOperand: currentNumber,
+        calculatorOperator: event.operation,
+        editingRateValue: '',
+      ));
+    }
+  }
+
+  void _onNumpadClear(
+    NumpadClear event,
+    Emitter<CurrenciesConverterState> emit,
+  ) {
+    emit(state.copyWith(
+      editingRateValue: '',
+      clearCalculator: true,
+    ));
+  }
+
+  void _onNumpadDelete(
+    NumpadDelete event,
+    Emitter<CurrenciesConverterState> emit,
+  ) {
+    final currentValue = state.editingRateValue;
+    if (currentValue.isEmpty) return;
+
+    emit(state.copyWith(
+      editingRateValue: currentValue.substring(0, currentValue.length - 1),
+    ));
+  }
+
+  void _onApplyRateChange(
+    ApplyRateChange event,
+    Emitter<CurrenciesConverterState> emit,
+  ) {
+    if (state.selectedCurrency == null) {
+      emit(state.copyWith(isEditingRate: false, clearCalculator: true));
+      return;
+    }
+
+    // Calculate final value if operation is pending
+    double? finalValue;
+    final currentValue = state.editingRateValue;
+
+    if (state.calculatorFirstOperand != null &&
+        state.calculatorOperator != null &&
+        currentValue.isNotEmpty) {
+      final secondOperand = double.tryParse(currentValue);
+      if (secondOperand != null) {
+        finalValue = _performCalculation(
+          state.calculatorFirstOperand!,
+          secondOperand,
+          state.calculatorOperator!,
+        );
+      }
+    } else if (currentValue.isNotEmpty) {
+      finalValue = double.tryParse(currentValue);
+    }
+
+    if (finalValue == null || finalValue <= 0) {
+      // Invalid value, just close the numpad
+      emit(state.copyWith(
+        isEditingRate: false,
+        editingRateValue: '',
+        clearCalculator: true,
+      ));
+      return;
+    }
+
+    // Calculate the multiplier to scale all rates
+    final oldSelectedRate = state.selectedCurrency!.rate.toDouble();
+    final multiplier = finalValue / oldSelectedRate;
+
+    // Update all displayed currencies with the new scaled rates
+    final updatedDisplayed = state.displayedCurrencies.map((currency) {
+      final newRate = currency.rate.toDouble() * multiplier;
+      return currency.copyWith(rate: newRate);
+    }).toList();
+
+    // Update the selected currency reference
+    final updatedSelected = updatedDisplayed.firstWhere(
+      (c) => c.id == state.selectedCurrency!.id,
+    );
+
+    emit(state.copyWith(
+      isEditingRate: false,
+      editingRateValue: '',
+      clearCalculator: true,
+      displayedCurrencies: updatedDisplayed,
+      selectedCurrency: updatedSelected,
+    ));
+  }
+
+  double _performCalculation(
+      double first, double second, String operation) {
+    switch (operation) {
+      case '+':
+        return first + second;
+      case '-':
+        return first - second;
+      case '×':
+        return first * second;
+      case '÷':
+        if (second == 0) return first; // Prevent division by zero
+        return first / second;
+      default:
+        return second;
+    }
   }
 }

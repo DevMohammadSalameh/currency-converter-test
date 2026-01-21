@@ -1,4 +1,5 @@
 import 'package:currency_converter/features/converter/presentation/widgets/currencies_list.dart';
+import 'package:currency_converter/features/converter/presentation/widgets/custom_numpad.dart';
 import 'package:currency_converter/features/history/presentation/view/history_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -61,146 +62,121 @@ class _ConverterViewState extends State<ConverterView> {
           }
         },
         builder: (context, state) {
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 90),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        if (state.lastUpdated != null)
-                          // Last Time Updated
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.access_time,
-                                  size: 16,
-                                  color: Colors.grey,
+          return Stack(
+            children: [
+              // Main content
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 90),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            if (state.lastUpdated != null)
+                              // Last Time Updated
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Last Time Updated: ${_formatTime(state.lastUpdated!)}',
-                                  style: const TextStyle(
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.access_time,
+                                      size: 16,
+                                      color: Colors.grey,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Last Time Updated: ${_formatTime(state.lastUpdated!)}',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            const CurrenciesList(),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(32),
+                                    // border: Border.all(
+                                    //   color: Theme.of(context)
+                                    //       .colorScheme
+                                    //       .primary
+                                    //       .withValues(alpha: 0.2),
+                                    // ),
+                                    color: Theme.of(context).colorScheme.primary
+                                        .withValues(alpha: 0.1),
+                                  ),
+                                  child: TextButton.icon(
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                    ),
+                                    onPressed: state.isEditingRate
+                                        ? null
+                                        : () =>
+                                              _navigateToCurrencyList(context),
+                                    icon: const Icon(Icons.add),
+                                    label: const Text('Add'),
+                                  ),
+                                ),
+                                const Spacer(),
+                                // Info Text
+                                const Text(
+                                  'Click to view usage guide',
+                                  style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey,
                                   ),
                                 ),
+                                // Info Button
+                                IconButton(
+                                  onPressed: () => _showInfoSnackBar(context),
+                                  icon: const Icon(Icons.info_outline),
+                                  tooltip: 'Info',
+                                ),
                               ],
-                            ),
-                          ),
-                        const CurrenciesList(),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(32),
-                                border: Border.all(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.primary.withValues(alpha: 0.2),
-                                ),
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.primary.withValues(alpha: 0.1),
-                              ),
-                              child: TextButton.icon(
-                                style: TextButton.styleFrom(
-                                  foregroundColor: Theme.of(
-                                    context,
-                                  ).colorScheme.primary,
-                                ),
-                                onPressed: () =>
-                                    _navigateToCurrencyList(context),
-                                icon: const Icon(Icons.add),
-                                label: const Text('Add'),
-                              ),
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              onPressed: () => _showInfoSnackBar(context),
-                              icon: const Icon(Icons.info_outline),
-                              tooltip: 'Info',
                             ),
                           ],
                         ),
-                        // AmountInput(
-                        //   controller: _amountController,
-                        //   onChanged: (value) {
-                        //     context.read<CurrenciesConverterBloc>().add(
-                        //       UpdateAmount(value),
-                        //     );
-                        //   },
-                        //   currencySymbol: state.fromCurrency?.symbol,
-                        //   hintText: 'Enter amount',
-                        // ),
-                        // const SizedBox(height: 24),
-                        // CurrencySelector(
-                        //   selectedCurrency: state.fromCurrency,
-                        //   label: 'From',
-                        //   onTap: () => _selectCurrency(context, isFrom: true),
-                        // ),
-                        // const SizedBox(height: 16),
-                        // Center(
-                        //   child: IconButton.filled(
-                        //     onPressed:
-                        //         state.fromCurrency != null &&
-                        //             state.toCurrency != null
-                        //         ? () {
-                        //             context.read<CurrenciesConverterBloc>().add(
-                        //               const SwapCurrencies(),
-                        //             );
-                        //           }
-                        //         : null,
-                        //     icon: const Icon(Icons.swap_vert),
-                        //     tooltip: 'Swap currencies',
-                        //   ),
-                        // ),
-                        // const SizedBox(height: 16),
-                        // CurrencySelector(
-                        //   selectedCurrency: state.toCurrency,
-                        //   label: 'To',
-                        //   onTap: () => _selectCurrency(context, isFrom: false),
-                        // ),
-                        // const SizedBox(height: 32),
-                        // FilledButton(
-                        //   onPressed:
-                        //       state.canConvert &&
-                        //           state.status != ConverterStatus.loading
-                        //       ? () {
-                        //           context.read<CurrenciesConverterBloc>().add(
-                        //             const ConvertCurrencyEvent(),
-                        //           );
-                        //         }
-                        //       : null,
-                        //   style: FilledButton.styleFrom(
-                        //     padding: const EdgeInsets.symmetric(vertical: 16),
-                        //   ),
-                        //   child: state.status == ConverterStatus.loading
-                        //       ? const SizedBox(
-                        //           height: 20,
-                        //           width: 20,
-                        //           child: CircularProgressIndicator(
-                        //             strokeWidth: 2,
-                        //             color: Colors.white,
-                        //           ),
-                        //         )
-                        //       : const Text('Convert'),
-                        // ),
-                        // const SizedBox(height: 24),
-                        // if (state.result != null)
-                        //   ConversionResultCard(result: state.result!),
-                      ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Scrim overlay when editing
+              if (state.isEditingRate)
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: () {
+                      context.read<CurrenciesConverterBloc>().add(
+                        const CancelEditingRate(),
+                      );
+                    },
+                    child: Container(
+                      color: Colors.black.withValues(alpha: 0.3),
                     ),
                   ),
                 ),
-              ],
-            ),
+              // Numpad slide up from bottom
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+                left: 0,
+                right: 0,
+                bottom: state.isEditingRate ? 0 : -500,
+                child: const CustomNumpad(),
+              ),
+            ],
           );
         },
       ),
@@ -221,7 +197,7 @@ class _ConverterViewState extends State<ConverterView> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
-          'Long press and drag to reorder.\nSwipe left to delete.',
+          '- Long press and drag to reorder.\n- Swipe left to delete.\n- Click on the selected currency to edit the rate and convert.',
         ),
       ),
     );
@@ -250,37 +226,6 @@ class _ConverterViewState extends State<ConverterView> {
     );
   }
 
-  // void _selectCurrency(BuildContext context, {required bool isFrom}) {
-  //   final converterBloc = context.read<CurrenciesConverterBloc>();
-
-  //   // Ensure currencies are loaded
-  //   if (!converterBloc.state.isCurrencyListLoaded) {
-  //     converterBloc.add(const LoadCurrencies());
-  //   }
-
-  //   Navigator.of(context).push(
-  //     MaterialPageRoute(
-  //       builder: (_) => BlocProvider.value(
-  //         value: converterBloc,
-  //         child: CurrencyListView(
-  //           title: isFrom ? 'Select From Currency' : 'Select To Currency',
-  //           selectedCurrency: isFrom
-  //               ? converterBloc.state.fromCurrency
-  //               : converterBloc.state.toCurrency,
-  //           onCurrencySelected: (currency) {
-  //             if (isFrom) {
-  //               converterBloc.add(SelectFromCurrency(currency));
-  //             } else {
-  //               converterBloc.add(SelectToCurrency(currency));
-  //             }
-  //             Navigator.of(context).pop();
-  //           },
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
   void _navigateToHistory(BuildContext context) {
     final converterState = context.read<CurrenciesConverterBloc>().state;
 
@@ -303,7 +248,6 @@ class _ConverterViewState extends State<ConverterView> {
   }
 
   String _formatTime(DateTime time) {
-    //from 2026-01-21 22:14:16.881442 to 21 Jan 2026 22:14
     Map<int, String> months = {
       1: 'Jan',
       2: 'Feb',

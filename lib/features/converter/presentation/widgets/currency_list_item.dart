@@ -9,21 +9,31 @@ class CurrencyListItem extends StatelessWidget {
     super.key,
     required this.currency,
     required this.isSelected,
+    this.isEditing = false,
+    this.selectedCurrency,
   });
 
   final Currency currency;
   final bool isSelected;
+  final bool isEditing;
+  final Currency? selectedCurrency;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.read<CurrenciesConverterBloc>().add(SelectCurrency(currency));
+        if (isSelected) {
+          // If already selected, start editing
+          context.read<CurrenciesConverterBloc>().add(const StartEditingRate());
+        } else {
+          // Otherwise, select this currency
+          context.read<CurrenciesConverterBloc>().add(SelectCurrency(currency));
+        }
       },
       child: Container(
         padding: const EdgeInsets.only(left: 16),
         margin: const EdgeInsets.symmetric(vertical: 4),
-        height: 64,
+        height: _showConversionText ? 70 : 64,
         decoration: BoxDecoration(
           boxShadow: [
             if (isSelected)
@@ -50,15 +60,12 @@ class CurrencyListItem extends StatelessWidget {
               currency.id,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            Spacer(),
-            Text(
-              currency.rate.toString(),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
+            const Spacer(),
+            _buildRateColumn(context),
             //Vertical Divider
             Container(
               width: 2,
-              height: 64,
+              height: _showConversionText ? 70 : 64,
               margin: const EdgeInsets.only(left: 8),
               color: isSelected
                   ? Theme.of(context).colorScheme.primary
@@ -81,5 +88,87 @@ class CurrencyListItem extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  bool get _showConversionText =>
+      !isSelected &&
+      selectedCurrency != null &&
+      selectedCurrency!.id != currency.id;
+
+  Widget _buildRateColumn(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildRateDisplay(context),
+        if (_showConversionText) ...[
+          Text(
+            _buildConversionText(),
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          ),
+        ],
+      ],
+    );
+  }
+
+  String _buildConversionText() {
+    if (selectedCurrency == null || selectedCurrency!.rate == 0) {
+      return '';
+    }
+    final conversionRate = currency.rate / selectedCurrency!.rate;
+    return '1 ${selectedCurrency!.id} = ${_formatRate(conversionRate)} ${currency.id}';
+  }
+
+  Widget _buildRateDisplay(BuildContext context) {
+    final rateText = _formatRate(currency.rate);
+
+    if (isEditing && isSelected) {
+      // Show editing indicator
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              rateText,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.edit,
+              size: 14,
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Text(
+      rateText,
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    );
+  }
+
+  String _formatRate(num rate) {
+    // Format rate to reasonable precision
+    if (rate == rate.truncate()) {
+      return rate.truncate().toString();
+    }
+    // Limit decimal places to 6
+    final formatted = rate.toDouble().toStringAsFixed(6);
+    // Remove trailing zeros
+    return formatted
+        .replaceAll(RegExp(r'0+$'), '')
+        .replaceAll(RegExp(r'\.$'), '');
   }
 }

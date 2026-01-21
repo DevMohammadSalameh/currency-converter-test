@@ -32,6 +32,12 @@ class CurrenciesConverterState extends Equatable {
   // Displayed currencies (for reorderable list)
   final List<Currency> displayedCurrencies;
 
+  // Rate editing fields
+  final bool isEditingRate;
+  final String editingRateValue;
+  final double? calculatorFirstOperand;
+  final String? calculatorOperator;
+
   const CurrenciesConverterState({
     this.status = ConverterStatus.initial,
     this.fromCurrency,
@@ -47,6 +53,10 @@ class CurrenciesConverterState extends Equatable {
     this.lastUpdated,
     this.selectedCurrency,
     this.displayedCurrencies = const [],
+    this.isEditingRate = false,
+    this.editingRateValue = '',
+    this.calculatorFirstOperand,
+    this.calculatorOperator,
   });
 
   bool get canConvert =>
@@ -83,6 +93,11 @@ class CurrenciesConverterState extends Equatable {
     DateTime? lastUpdated,
     Currency? selectedCurrency,
     List<Currency>? displayedCurrencies,
+    bool? isEditingRate,
+    String? editingRateValue,
+    double? calculatorFirstOperand,
+    String? calculatorOperator,
+    bool clearCalculator = false,
   }) {
     return CurrenciesConverterState(
       status: status ?? this.status,
@@ -101,6 +116,14 @@ class CurrenciesConverterState extends Equatable {
       lastUpdated: lastUpdated ?? this.lastUpdated,
       selectedCurrency: selectedCurrency ?? this.selectedCurrency,
       displayedCurrencies: displayedCurrencies ?? this.displayedCurrencies,
+      isEditingRate: isEditingRate ?? this.isEditingRate,
+      editingRateValue: editingRateValue ?? this.editingRateValue,
+      calculatorFirstOperand: clearCalculator
+          ? null
+          : (calculatorFirstOperand ?? this.calculatorFirstOperand),
+      calculatorOperator: clearCalculator
+          ? null
+          : (calculatorOperator ?? this.calculatorOperator),
     );
   }
 
@@ -120,5 +143,9 @@ class CurrenciesConverterState extends Equatable {
     lastUpdated,
     selectedCurrency,
     displayedCurrencies,
+    isEditingRate,
+    editingRateValue,
+    calculatorFirstOperand,
+    calculatorOperator,
   ];
 }

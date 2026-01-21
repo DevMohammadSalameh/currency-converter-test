@@ -101,3 +101,42 @@ class RemoveCurrencyFromDisplayed extends CurrenciesConverterEvent {
   @override
   List<Object?> get props => [currency];
 }
+
+// Rate editing events
+class StartEditingRate extends CurrenciesConverterEvent {
+  const StartEditingRate();
+}
+
+class CancelEditingRate extends CurrenciesConverterEvent {
+  const CancelEditingRate();
+}
+
+class NumpadDigitPressed extends CurrenciesConverterEvent {
+  final String digit;
+
+  const NumpadDigitPressed(this.digit);
+
+  @override
+  List<Object?> get props => [digit];
+}
+
+class NumpadOperationPressed extends CurrenciesConverterEvent {
+  final String operation;
+
+  const NumpadOperationPressed(this.operation);
+
+  @override
+  List<Object?> get props => [operation];
+}
+
+class NumpadClear extends CurrenciesConverterEvent {
+  const NumpadClear();
+}
+
+class NumpadDelete extends CurrenciesConverterEvent {
+  const NumpadDelete();
+}
+
+class ApplyRateChange extends CurrenciesConverterEvent {
+  const ApplyRateChange();
+}
