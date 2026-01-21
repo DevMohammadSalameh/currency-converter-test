@@ -2,6 +2,7 @@ import 'package:currency_converter/features/converter/data/models/currency.dart'
 import 'package:currency_converter/features/converter/domain/usecases/get_currencies.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/storage/app_preferences.dart';
 import '../../domain/usecases/convert_currency.dart';
 import 'currencies_converter_event.dart';
 import 'converter_state.dart';
@@ -10,12 +11,14 @@ class CurrenciesConverterBloc
     extends Bloc<CurrenciesConverterEvent, CurrenciesConverterState> {
   final ConvertCurrency convertCurrency;
   final GetCurrencies getCurrencies;
+  final AppPreferences appPreferences;
 
   static const defaultDisplayedCurrencyIds = ['USD', 'JOD'];
 
   CurrenciesConverterBloc({
     required this.convertCurrency,
     required this.getCurrencies,
+    required this.appPreferences,
   }) : super(const CurrenciesConverterState()) {
     on<SelectFromCurrency>(_onSelectFromCurrency);
     on<SelectToCurrency>(_onSelectToCurrency);
@@ -70,12 +73,29 @@ class CurrenciesConverterBloc
         ),
       ),
       (currencyResult) {
-        // Initialize displayed currencies if empty
+        // Initialize displayed currencies from saved preferences or defaults
         List<Currency> displayed = state.displayedCurrencies;
         if (displayed.isEmpty) {
-          displayed = currencyResult.currencies
-              .where((c) => defaultDisplayedCurrencyIds.contains(c.id))
+          // Try to load saved currency IDs, fallback to defaults
+          final savedIds = appPreferences.displayedCurrencyIds ??
+              defaultDisplayedCurrencyIds;
+          displayed = savedIds
+              .map((id) {
+                try {
+                  return currencyResult.currencies.firstWhere((c) => c.id == id);
+                } catch (_) {
+                  return null;
+                }
+              })
+              .whereType<Currency>()
               .toList();
+
+          // If no valid currencies found, use defaults
+          if (displayed.isEmpty) {
+            displayed = currencyResult.currencies
+                .where((c) => defaultDisplayedCurrencyIds.contains(c.id))
+                .toList();
+          }
         }
 
         emit(
@@ -93,6 +113,12 @@ class CurrenciesConverterBloc
     );
   }
 
+  /// Helper to save displayed currency IDs to preferences
+  void _saveDisplayedCurrencies(List<Currency> currencies) {
+    final ids = currencies.map((c) => c.id).toList();
+    appPreferences.setDisplayedCurrencyIds(ids);
+  }
+
   void _onReorderCurrencies(
     ReorderCurrencies event,
     Emitter<CurrenciesConverterState> emit,
@@ -101,6 +127,7 @@ class CurrenciesConverterBloc
     final Currency item = reordered.removeAt(event.oldIndex);
     reordered.insert(event.newIndex, item);
 
+    _saveDisplayedCurrencies(reordered);
     emit(state.copyWith(displayedCurrencies: reordered));
   }
 
@@ -114,6 +141,7 @@ class CurrenciesConverterBloc
     }
 
     final List<Currency> updated = [...state.displayedCurrencies, event.currency];
+    _saveDisplayedCurrencies(updated);
     emit(state.copyWith(displayedCurrencies: updated));
   }
 
@@ -131,6 +159,7 @@ class CurrenciesConverterBloc
       newSelected = updated.isNotEmpty ? updated.first : null;
     }
 
+    _saveDisplayedCurrencies(updated);
     emit(state.copyWith(
       displayedCurrencies: updated,
       selectedCurrency: newSelected,
@@ -165,6 +194,7 @@ class CurrenciesConverterBloc
       updated[index] = event.newCurrency;
     }
 
+    _saveDisplayedCurrencies(updated);
     // Update selected currency to the new one
     emit(state.copyWith(
       displayedCurrencies: updated,

@@ -71,7 +71,11 @@ Future<void> init() async {
 void _initCurrenciesFeature() {
   // Bloc
   sl.registerFactory(
-    () => CurrenciesConverterBloc(getCurrencies: sl(), convertCurrency: sl()),
+    () => CurrenciesConverterBloc(
+      getCurrencies: sl(),
+      convertCurrency: sl(),
+      appPreferences: sl(),
+    ),
   );
 
   // Use cases

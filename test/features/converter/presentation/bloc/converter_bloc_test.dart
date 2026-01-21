@@ -1,5 +1,6 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:currency_converter/core/error/failures.dart';
+import 'package:currency_converter/core/storage/app_preferences.dart';
 import 'package:currency_converter/features/converter/data/models/currency.dart';
 import 'package:currency_converter/features/converter/domain/entities/conversion_result.dart';
 import 'package:currency_converter/features/converter/domain/usecases/convert_currency.dart';
@@ -14,18 +15,27 @@ import 'package:mockito/mockito.dart';
 
 import 'converter_bloc_test.mocks.dart';
 
-@GenerateMocks([ConvertCurrency, GetCurrencies])
+@GenerateMocks([ConvertCurrency, GetCurrencies, AppPreferences])
 void main() {
   late CurrenciesConverterBloc bloc;
   late MockConvertCurrency mockConvertCurrency;
   late MockGetCurrencies mockGetCurrencies;
+  late MockAppPreferences mockAppPreferences;
 
   setUp(() {
     mockConvertCurrency = MockConvertCurrency();
     mockGetCurrencies = MockGetCurrencies();
+    mockAppPreferences = MockAppPreferences();
+
+    // Default stub for displayedCurrencyIds
+    when(mockAppPreferences.displayedCurrencyIds).thenReturn(null);
+    when(mockAppPreferences.setDisplayedCurrencyIds(any))
+        .thenAnswer((_) async {});
+
     bloc = CurrenciesConverterBloc(
       convertCurrency: mockConvertCurrency,
       getCurrencies: mockGetCurrencies,
+      appPreferences: mockAppPreferences,
     );
   });
 

@@ -6,6 +6,7 @@
 import 'dart:async' as _i6;
 
 import 'package:currency_converter/core/error/failures.dart' as _i7;
+import 'package:currency_converter/core/storage/app_preferences.dart' as _i11;
 import 'package:currency_converter/features/converter/domain/entities/conversion_result.dart'
     as _i8;
 import 'package:currency_converter/features/converter/domain/entities/currency_result.dart'
@@ -123,4 +124,39 @@ class MockGetCurrencies extends _i1.Mock implements _i9.GetCurrencies {
                 ),
           )
           as _i6.Future<_i3.Either<_i7.Failure, _i10.CurrencyResult>>);
+}
+
+/// A class which mocks [AppPreferences].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAppPreferences extends _i1.Mock implements _i11.AppPreferences {
+  MockAppPreferences() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  bool get skipRefreshConfirmation =>
+      (super.noSuchMethod(
+            Invocation.getter(#skipRefreshConfirmation),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
+  _i6.Future<void> setSkipRefreshConfirmation(bool? value) =>
+      (super.noSuchMethod(
+            Invocation.method(#setSkipRefreshConfirmation, [value]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> setDisplayedCurrencyIds(List<String>? ids) =>
+      (super.noSuchMethod(
+            Invocation.method(#setDisplayedCurrencyIds, [ids]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
 }
