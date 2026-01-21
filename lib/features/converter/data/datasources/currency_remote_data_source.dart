@@ -52,6 +52,7 @@ class CurrencyRemoteDataSourceImpl implements CurrencyRemoteDataSource {
               CurrencyModel(
                 id: code,
                 name: name,
+                rate: rate,
                 symbol: null, // Symbol not available in new API
                 countryCode: countryCode,
               ),

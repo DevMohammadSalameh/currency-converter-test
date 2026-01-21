@@ -4,6 +4,7 @@ class CurrencyModel extends Currency {
   const CurrencyModel({
     required super.id,
     required super.name,
+    required super.rate,
     super.symbol,
     super.countryCode,
   });
@@ -18,6 +19,7 @@ class CurrencyModel extends Currency {
     return CurrencyModel(
       id: id,
       name: json['currencyName'] ?? json['name'] ?? '',
+      rate: json['rate'] ?? 1,
       symbol: json['currencySymbol'] ?? json['symbol'],
       countryCode:
           json['id']?.toString().substring(0, 2).toLowerCase() ??
@@ -33,6 +35,7 @@ class CurrencyModel extends Currency {
     return CurrencyModel(
       id: map['id'] as String,
       name: map['name'] as String,
+      rate: map['rate'] as num,
       symbol: map['symbol'] as String?,
       countryCode: map['country_code'] as String?,
     );
@@ -42,6 +45,7 @@ class CurrencyModel extends Currency {
     return {
       'id': id,
       'name': name,
+      'rate': rate,
       'symbol': symbol,
       'country_code': countryCode,
     };
@@ -51,6 +55,7 @@ class CurrencyModel extends Currency {
     return CurrencyModel(
       id: currency.id,
       name: currency.name,
+      rate: currency.rate,
       symbol: currency.symbol,
       countryCode: currency.countryCode,
     );

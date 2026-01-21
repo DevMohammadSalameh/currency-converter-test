@@ -64,3 +64,22 @@ class SearchCurrencies extends CurrenciesConverterEvent {
   @override
   List<Object?> get props => [query];
 }
+
+class SelectCurrency extends CurrenciesConverterEvent {
+  final Currency currency;
+
+  const SelectCurrency(this.currency);
+
+  @override
+  List<Object?> get props => [currency];
+}
+
+class ReorderCurrencies extends CurrenciesConverterEvent {
+  final int oldIndex;
+  final int newIndex;
+
+  const ReorderCurrencies({required this.oldIndex, required this.newIndex});
+
+  @override
+  List<Object?> get props => [oldIndex, newIndex];
+}

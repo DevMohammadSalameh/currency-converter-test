@@ -5,12 +5,14 @@ class Currency extends Equatable {
   final String name;
   final String? symbol;
   final String? countryCode;
+  final num rate;
 
   const Currency({
     required this.id,
     required this.name,
     this.symbol,
     this.countryCode,
+    required this.rate,
   });
 
   String get flagUrl {

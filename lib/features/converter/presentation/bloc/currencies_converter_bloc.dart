@@ -12,6 +12,8 @@ class CurrenciesConverterBloc
   final ConvertCurrency convertCurrency;
   final GetCurrencies getCurrencies;
 
+  static const defaultDisplayedCurrencyIds = ['USD', 'JOD'];
+
   CurrenciesConverterBloc({
     required this.convertCurrency,
     required this.getCurrencies,
@@ -25,30 +27,69 @@ class CurrenciesConverterBloc
     on<LoadCurrencies>(_onLoadCurrencies);
     on<RefreshCurrencies>(_onRefreshCurrencies);
     on<SearchCurrencies>(_onSearchCurrencies);
+    on<ReorderCurrencies>(_onReorderCurrencies);
+    on<SelectCurrency>(_onSelectCurrency);
+  }
+
+  void _onSelectCurrency(
+    SelectCurrency event,
+    Emitter<CurrenciesConverterState> emit,
+  ) {
+    emit(state.copyWith(selectedCurrency: event.currency));
   }
 
   Future<void> _onLoadCurrencies(
     LoadCurrencies event,
     Emitter<CurrenciesConverterState> emit,
   ) async {
-    emit(state.copyWith(
-      currencyListStatus: CurrencyListStatus.loading,
-      clearCurrencyListError: true,
-    ));
+    emit(
+      state.copyWith(
+        currencyListStatus: CurrencyListStatus.loading,
+        clearCurrencyListError: true,
+      ),
+    );
 
     final result = await getCurrencies(NoParams());
 
     result.fold(
-      (failure) => emit(state.copyWith(
-        currencyListStatus: CurrencyListStatus.error,
-        currencyListError: failure.message,
-      )),
-      (currencies) => emit(state.copyWith(
-        currencyListStatus: CurrencyListStatus.loaded,
-        currencies: currencies,
-        filteredCurrencies: currencies,
-      )),
+      (failure) => emit(
+        state.copyWith(
+          currencyListStatus: CurrencyListStatus.error,
+          currencyListError: failure.message,
+        ),
+      ),
+      (currencies) {
+        // Initialize displayed currencies if empty
+        List<Currency> displayed = state.displayedCurrencies;
+        if (displayed.isEmpty) {
+          displayed = currencies
+              .where((c) => defaultDisplayedCurrencyIds.contains(c.id))
+              .toList();
+        }
+
+        emit(
+          state.copyWith(
+            currencyListStatus: CurrencyListStatus.loaded,
+            currencies: currencies,
+            filteredCurrencies: currencies,
+            displayedCurrencies: displayed,
+            lastUpdated: DateTime.now(),
+            selectedCurrency: displayed.isNotEmpty ? displayed.first : null,
+          ),
+        );
+      },
     );
+  }
+
+  void _onReorderCurrencies(
+    ReorderCurrencies event,
+    Emitter<CurrenciesConverterState> emit,
+  ) {
+    final List<Currency> reordered = List.from(state.displayedCurrencies);
+    final Currency item = reordered.removeAt(event.oldIndex);
+    reordered.insert(event.newIndex, item);
+
+    emit(state.copyWith(displayedCurrencies: reordered));
   }
 
   Future<void> _onRefreshCurrencies(
@@ -61,19 +102,23 @@ class CurrenciesConverterBloc
       (failure) {
         // Keep existing data on refresh failure, only show error if no data
         if (state.currencies.isEmpty) {
-          emit(state.copyWith(
-            currencyListStatus: CurrencyListStatus.error,
-            currencyListError: failure.message,
-          ));
+          emit(
+            state.copyWith(
+              currencyListStatus: CurrencyListStatus.error,
+              currencyListError: failure.message,
+            ),
+          );
         }
       },
       (currencies) {
         final filtered = _filterCurrencies(currencies, state.searchQuery);
-        emit(state.copyWith(
-          currencyListStatus: CurrencyListStatus.loaded,
-          currencies: currencies,
-          filteredCurrencies: filtered,
-        ));
+        emit(
+          state.copyWith(
+            currencyListStatus: CurrencyListStatus.loaded,
+            currencies: currencies,
+            filteredCurrencies: filtered,
+          ),
+        );
       },
     );
   }
@@ -83,10 +128,9 @@ class CurrenciesConverterBloc
     Emitter<CurrenciesConverterState> emit,
   ) {
     final filtered = _filterCurrencies(state.currencies, event.query);
-    emit(state.copyWith(
-      filteredCurrencies: filtered,
-      searchQuery: event.query,
-    ));
+    emit(
+      state.copyWith(filteredCurrencies: filtered, searchQuery: event.query),
+    );
   }
 
   List<Currency> _filterCurrencies(List<Currency> currencies, String query) {
@@ -173,13 +217,15 @@ class CurrenciesConverterBloc
     Emitter<CurrenciesConverterState> emit,
   ) {
     // Keep currencies loaded, only reset converter state
-    emit(state.copyWith(
-      status: ConverterStatus.initial,
-      fromCurrency: null,
-      toCurrency: null,
-      amount: '',
-      clearResult: true,
-      clearError: true,
-    ));
+    emit(
+      state.copyWith(
+        status: ConverterStatus.initial,
+        fromCurrency: null,
+        toCurrency: null,
+        amount: '',
+        clearResult: true,
+        clearError: true,
+      ),
+    );
   }
 }

@@ -38,6 +38,7 @@ void main() {
     name: 'United States Dollar',
     symbol: '\$',
     countryCode: 'us',
+    rate: 1,
   );
 
   const tToCurrency = Currency(
@@ -45,6 +46,7 @@ void main() {
     name: 'Euro',
     symbol: '€',
     countryCode: 'eu',
+    rate: 1,
   );
 
   final tConversionResult = ConversionResult(
@@ -56,9 +58,12 @@ void main() {
     timestamp: DateTime(2024, 1, 15),
   );
 
-  test('initial state should be CurrenciesConverterState with default values', () {
-    expect(bloc.state, const CurrenciesConverterState());
-  });
+  test(
+    'initial state should be CurrenciesConverterState with default values',
+    () {
+      expect(bloc.state, const CurrenciesConverterState());
+    },
+  );
 
   group('SelectFromCurrency', () {
     blocTest<CurrenciesConverterBloc, CurrenciesConverterState>(

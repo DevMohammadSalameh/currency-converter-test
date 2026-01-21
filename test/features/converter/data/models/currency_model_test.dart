@@ -8,6 +8,7 @@ void main() {
     name: 'United States Dollar',
     symbol: '\$',
     countryCode: 'us',
+    rate: 1,
   );
 
   test('should be a subclass of Currency entity', () {
@@ -66,6 +67,7 @@ void main() {
       final map = {
         'id': 'USD',
         'name': 'United States Dollar',
+        'rate': 1,
         'symbol': '\$',
         'country_code': 'us',
       };
@@ -87,6 +89,7 @@ void main() {
       expect(result, {
         'id': 'USD',
         'name': 'United States Dollar',
+        'rate': 1,
         'symbol': '\$',
         'country_code': 'us',
       });
@@ -101,6 +104,7 @@ void main() {
         name: 'United States Dollar',
         symbol: '\$',
         countryCode: 'us',
+        rate: 1,
       );
 
       // act

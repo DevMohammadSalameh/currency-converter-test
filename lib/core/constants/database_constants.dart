@@ -19,16 +19,19 @@ class DatabaseConstants {
   static const String columnDate = 'date';
 
   // SQL statements
-  static const String createCurrenciesTable = '''
+  static const String createCurrenciesTable =
+      '''
     CREATE TABLE $currenciesTable (
       $columnId TEXT PRIMARY KEY,
       $columnName TEXT NOT NULL,
       $columnSymbol TEXT,
-      $columnCountryCode TEXT
+      $columnCountryCode TEXT,
+      $columnRate REAL NOT NULL
     )
   ''';
 
-  static const String createExchangeRatesTable = '''
+  static const String createExchangeRatesTable =
+      '''
     CREATE TABLE $exchangeRatesTable (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       $columnFromCurrency TEXT NOT NULL,

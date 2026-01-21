@@ -26,9 +26,16 @@ void main() {
       name: 'United States Dollar',
       symbol: '\$',
       countryCode: 'us',
+      rate: 1,
     ),
-    Currency(id: 'EUR', name: 'Euro', symbol: '€', countryCode: 'eu'),
-    Currency(id: 'GBP', name: 'British Pound', symbol: '£', countryCode: 'gb'),
+    Currency(id: 'EUR', name: 'Euro', symbol: '€', countryCode: 'eu', rate: 1),
+    Currency(
+      id: 'GBP',
+      name: 'British Pound',
+      symbol: '£',
+      countryCode: 'gb',
+      rate: 1,
+    ),
   ];
 
   test('should get currencies from the repository', () async {

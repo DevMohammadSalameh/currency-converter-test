@@ -23,6 +23,15 @@ class CurrenciesConverterState extends Equatable {
   final String searchQuery;
   final String? currencyListError;
 
+  // Last updated
+  final DateTime? lastUpdated;
+
+  // Selected currency
+  final Currency? selectedCurrency;
+
+  // Displayed currencies (for reorderable list)
+  final List<Currency> displayedCurrencies;
+
   const CurrenciesConverterState({
     this.status = ConverterStatus.initial,
     this.fromCurrency,
@@ -35,6 +44,9 @@ class CurrenciesConverterState extends Equatable {
     this.filteredCurrencies = const [],
     this.searchQuery = '',
     this.currencyListError,
+    this.lastUpdated,
+    this.selectedCurrency,
+    this.displayedCurrencies = const [],
   });
 
   bool get canConvert =>
@@ -68,6 +80,9 @@ class CurrenciesConverterState extends Equatable {
     String? searchQuery,
     String? currencyListError,
     bool clearCurrencyListError = false,
+    DateTime? lastUpdated,
+    Currency? selectedCurrency,
+    List<Currency>? displayedCurrencies,
   }) {
     return CurrenciesConverterState(
       status: status ?? this.status,
@@ -83,21 +98,27 @@ class CurrenciesConverterState extends Equatable {
       currencyListError: clearCurrencyListError
           ? null
           : (currencyListError ?? this.currencyListError),
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+      selectedCurrency: selectedCurrency ?? this.selectedCurrency,
+      displayedCurrencies: displayedCurrencies ?? this.displayedCurrencies,
     );
   }
 
   @override
   List<Object?> get props => [
-        status,
-        fromCurrency,
-        toCurrency,
-        amount,
-        result,
-        errorMessage,
-        currencyListStatus,
-        currencies,
-        filteredCurrencies,
-        searchQuery,
-        currencyListError,
-      ];
+    status,
+    fromCurrency,
+    toCurrency,
+    amount,
+    result,
+    errorMessage,
+    currencyListStatus,
+    currencies,
+    filteredCurrencies,
+    searchQuery,
+    currencyListError,
+    lastUpdated,
+    selectedCurrency,
+    displayedCurrencies,
+  ];
 }
