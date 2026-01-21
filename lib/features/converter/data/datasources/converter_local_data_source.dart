@@ -27,13 +27,13 @@ class ConverterLocalDataSourceImpl implements ConverterLocalDataSource {
     required String toCurrency,
   }) async {
     try {
-      final today = DateTime.now().toIso8601String().split('T')[0];
-
+      // Get most recent cached rate regardless of date
       final result = await database.query(
         DatabaseConstants.exchangeRatesTable,
         where:
-            '${DatabaseConstants.columnFromCurrency} = ? AND ${DatabaseConstants.columnToCurrency} = ? AND ${DatabaseConstants.columnDate} = ?',
-        whereArgs: [fromCurrency, toCurrency, today],
+            '${DatabaseConstants.columnFromCurrency} = ? AND ${DatabaseConstants.columnToCurrency} = ?',
+        whereArgs: [fromCurrency, toCurrency],
+        orderBy: '${DatabaseConstants.columnDate} DESC',
         limit: 1,
       );
 

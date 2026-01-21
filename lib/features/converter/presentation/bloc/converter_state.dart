@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/enums/data_source.dart';
 import '../../data/models/currency.dart';
 import '../../domain/entities/conversion_result.dart';
 
@@ -26,6 +27,9 @@ class CurrenciesConverterState extends Equatable {
   // Last updated
   final DateTime? lastUpdated;
 
+  // Data source (API or Cache)
+  final DataSource? dataSource;
+
   // Selected currency
   final Currency? selectedCurrency;
 
@@ -51,6 +55,7 @@ class CurrenciesConverterState extends Equatable {
     this.searchQuery = '',
     this.currencyListError,
     this.lastUpdated,
+    this.dataSource,
     this.selectedCurrency,
     this.displayedCurrencies = const [],
     this.isEditingRate = false,
@@ -91,6 +96,7 @@ class CurrenciesConverterState extends Equatable {
     String? currencyListError,
     bool clearCurrencyListError = false,
     DateTime? lastUpdated,
+    DataSource? dataSource,
     Currency? selectedCurrency,
     List<Currency>? displayedCurrencies,
     bool? isEditingRate,
@@ -114,6 +120,7 @@ class CurrenciesConverterState extends Equatable {
           ? null
           : (currencyListError ?? this.currencyListError),
       lastUpdated: lastUpdated ?? this.lastUpdated,
+      dataSource: dataSource ?? this.dataSource,
       selectedCurrency: selectedCurrency ?? this.selectedCurrency,
       displayedCurrencies: displayedCurrencies ?? this.displayedCurrencies,
       isEditingRate: isEditingRate ?? this.isEditingRate,
@@ -141,6 +148,7 @@ class CurrenciesConverterState extends Equatable {
     searchQuery,
     currencyListError,
     lastUpdated,
+    dataSource,
     selectedCurrency,
     displayedCurrencies,
     isEditingRate,

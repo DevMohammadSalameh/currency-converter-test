@@ -3,8 +3,12 @@ import 'package:currency_converter/features/converter/presentation/widgets/custo
 import 'package:currency_converter/features/history/presentation/view/history_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
+import '../../../../core/enums/data_source.dart';
+import '../../../../core/storage/app_preferences.dart';
 import '../../../../core/widgets/gradient_scaffold.dart';
+import '../../../../core/widgets/refresh_confirmation_dialog.dart';
 import 'currency_list_view.dart';
 import '../bloc/currencies_converter_bloc.dart';
 import '../bloc/currencies_converter_event.dart';
@@ -51,6 +55,35 @@ class _ConverterViewState extends State<ConverterView> {
       ),
       body: BlocConsumer<CurrenciesConverterBloc, CurrenciesConverterState>(
         listener: (context, state) {
+          // Show loading dialog when currency list is loading
+          if (state.currencyListStatus == CurrencyListStatus.loading) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => const Center(
+                child: Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text('Loading currencies...'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          } else if (state.currencyListStatus == CurrencyListStatus.loaded ||
+              state.currencyListStatus == CurrencyListStatus.error) {
+            // Dismiss loading dialog if it's showing
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+          }
+
           if (state.status == ConverterStatus.failure &&
               state.errorMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -72,81 +105,96 @@ class _ConverterViewState extends State<ConverterView> {
                   children: [
                     const SizedBox(height: 90),
                     Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            if (state.lastUpdated != null)
-                              // Last Time Updated
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.access_time,
-                                      size: 16,
-                                      color: Colors.grey,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Last Time Updated: ${_formatTime(state.lastUpdated!)}',
-                                      style: const TextStyle(
-                                        fontSize: 12,
+                      child: RefreshIndicator(
+                        onRefresh: () => _handleRefresh(context),
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: Column(
+                            children: [
+                              if (state.lastUpdated != null)
+                                // Last Time Updated with Data Source Icon
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.access_time,
+                                        size: 16,
                                         color: Colors.grey,
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Last Time Updated: ${_formatTime(state.lastUpdated!)}',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      // Data Source Icon
+                                      if (state.dataSource != null)
+                                        Tooltip(
+                                          message: state.dataSource == DataSource.api
+                                              ? 'Fetched from API'
+                                              : 'Loaded from local database',
+                                          child: Icon(
+                                            state.dataSource == DataSource.api
+                                                ? Icons.cloud_download
+                                                : Icons.storage,
+                                            size: 16,
+                                            color: state.dataSource == DataSource.api
+                                                ? Colors.blue
+                                                : Colors.green,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ),
+                              const CurrenciesList(),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(32),
+                                      color: Theme.of(context).colorScheme.primary
+                                          .withValues(alpha: 0.1),
+                                    ),
+                                    child: TextButton.icon(
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                      ),
+                                      onPressed: state.isEditingRate
+                                          ? null
+                                          : () =>
+                                                _navigateToCurrencyList(context),
+                                      icon: const Icon(Icons.add),
+                                      label: const Text('Add'),
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  // Info Text
+                                  const Text(
+                                    'Click to view usage guide',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  // Info Button
+                                  IconButton(
+                                    onPressed: () => _showInfoSnackBar(context),
+                                    icon: const Icon(Icons.info_outline),
+                                    tooltip: 'Info',
+                                  ),
+                                ],
                               ),
-                            const CurrenciesList(),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(32),
-                                    // border: Border.all(
-                                    //   color: Theme.of(context)
-                                    //       .colorScheme
-                                    //       .primary
-                                    //       .withValues(alpha: 0.2),
-                                    // ),
-                                    color: Theme.of(context).colorScheme.primary
-                                        .withValues(alpha: 0.1),
-                                  ),
-                                  child: TextButton.icon(
-                                    style: TextButton.styleFrom(
-                                      foregroundColor: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                    ),
-                                    onPressed: state.isEditingRate
-                                        ? null
-                                        : () =>
-                                              _navigateToCurrencyList(context),
-                                    icon: const Icon(Icons.add),
-                                    label: const Text('Add'),
-                                  ),
-                                ),
-                                const Spacer(),
-                                // Info Text
-                                const Text(
-                                  'Click to view usage guide',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                // Info Button
-                                IconButton(
-                                  onPressed: () => _showInfoSnackBar(context),
-                                  icon: const Icon(Icons.info_outline),
-                                  tooltip: 'Info',
-                                ),
-                              ],
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -181,6 +229,33 @@ class _ConverterViewState extends State<ConverterView> {
         },
       ),
     );
+  }
+
+  Future<void> _handleRefresh(BuildContext context) async {
+    final appPreferences = GetIt.instance<AppPreferences>();
+    final bloc = context.read<CurrenciesConverterBloc>();
+
+    // Check if user has opted to skip the confirmation dialog
+    if (appPreferences.skipRefreshConfirmation) {
+      bloc.add(const ForceRefreshCurrencies());
+      return;
+    }
+
+    // Show confirmation dialog
+    final result = await showRefreshConfirmationDialog(context);
+
+    if (result == null) {
+      // User cancelled
+      return;
+    }
+
+    // User confirmed - save preference if "don't ask again" was checked
+    if (result) {
+      await appPreferences.setSkipRefreshConfirmation(true);
+    }
+
+    // Trigger force refresh
+    bloc.add(const ForceRefreshCurrencies());
   }
 
   void _showSnackBar(BuildContext context) {

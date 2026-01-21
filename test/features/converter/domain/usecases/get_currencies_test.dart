@@ -1,6 +1,7 @@
+import 'package:currency_converter/core/enums/data_source.dart';
 import 'package:currency_converter/core/error/failures.dart';
-import 'package:currency_converter/core/usecases/usecase.dart';
 import 'package:currency_converter/features/converter/data/models/currency.dart';
+import 'package:currency_converter/features/converter/domain/entities/currency_result.dart';
 import 'package:currency_converter/features/converter/domain/repositories/currency_repository.dart';
 import 'package:currency_converter/features/converter/domain/usecases/get_currencies.dart';
 import 'package:dartz/dartz.dart';
@@ -38,33 +39,53 @@ void main() {
     ),
   ];
 
+  const tCurrencyResult = CurrencyResult(
+    currencies: tCurrencies,
+    source: DataSource.api,
+  );
+
   test('should get currencies from the repository', () async {
     // arrange
     when(
-      mockRepository.getCurrencies(),
-    ).thenAnswer((_) async => const Right(tCurrencies));
+      mockRepository.getCurrencies(forceRefresh: false),
+    ).thenAnswer((_) async => const Right(tCurrencyResult));
 
     // act
-    final result = await usecase(NoParams());
+    final result = await usecase(const GetCurrenciesParams());
 
     // assert
-    expect(result, const Right(tCurrencies));
-    verify(mockRepository.getCurrencies());
+    expect(result, const Right(tCurrencyResult));
+    verify(mockRepository.getCurrencies(forceRefresh: false));
     verifyNoMoreInteractions(mockRepository);
   });
 
   test('should return failure when repository fails', () async {
     // arrange
     when(
-      mockRepository.getCurrencies(),
+      mockRepository.getCurrencies(forceRefresh: false),
     ).thenAnswer((_) async => const Left(ServerFailure('Server error')));
 
     // act
-    final result = await usecase(NoParams());
+    final result = await usecase(const GetCurrenciesParams());
 
     // assert
     expect(result, const Left(ServerFailure('Server error')));
-    verify(mockRepository.getCurrencies());
+    verify(mockRepository.getCurrencies(forceRefresh: false));
+    verifyNoMoreInteractions(mockRepository);
+  });
+
+  test('should pass forceRefresh to repository', () async {
+    // arrange
+    when(
+      mockRepository.getCurrencies(forceRefresh: true),
+    ).thenAnswer((_) async => const Right(tCurrencyResult));
+
+    // act
+    final result = await usecase(const GetCurrenciesParams(forceRefresh: true));
+
+    // assert
+    expect(result, const Right(tCurrencyResult));
+    verify(mockRepository.getCurrencies(forceRefresh: true));
     verifyNoMoreInteractions(mockRepository);
   });
 }

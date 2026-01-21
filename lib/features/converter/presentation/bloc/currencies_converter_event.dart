@@ -56,6 +56,10 @@ class RefreshCurrencies extends CurrenciesConverterEvent {
   const RefreshCurrencies();
 }
 
+class ForceRefreshCurrencies extends CurrenciesConverterEvent {
+  const ForceRefreshCurrencies();
+}
+
 class SearchCurrencies extends CurrenciesConverterEvent {
   final String query;
 

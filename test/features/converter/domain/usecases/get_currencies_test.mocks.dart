@@ -7,6 +7,8 @@ import 'dart:async' as _i4;
 
 import 'package:currency_converter/core/error/failures.dart' as _i5;
 import 'package:currency_converter/features/converter/data/models/currency.dart'
+    as _i7;
+import 'package:currency_converter/features/converter/domain/entities/currency_result.dart'
     as _i6;
 import 'package:currency_converter/features/converter/domain/repositories/currency_repository.dart'
     as _i3;
@@ -43,22 +45,28 @@ class MockCurrencyRepository extends _i1.Mock
   }
 
   @override
-  _i4.Future<_i2.Either<_i5.Failure, List<_i6.Currency>>> getCurrencies() =>
+  _i4.Future<_i2.Either<_i5.Failure, _i6.CurrencyResult>> getCurrencies({
+    bool? forceRefresh = false,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#getCurrencies, []),
+            Invocation.method(#getCurrencies, [], {
+              #forceRefresh: forceRefresh,
+            }),
             returnValue:
-                _i4.Future<_i2.Either<_i5.Failure, List<_i6.Currency>>>.value(
-                  _FakeEither_0<_i5.Failure, List<_i6.Currency>>(
+                _i4.Future<_i2.Either<_i5.Failure, _i6.CurrencyResult>>.value(
+                  _FakeEither_0<_i5.Failure, _i6.CurrencyResult>(
                     this,
-                    Invocation.method(#getCurrencies, []),
+                    Invocation.method(#getCurrencies, [], {
+                      #forceRefresh: forceRefresh,
+                    }),
                   ),
                 ),
           )
-          as _i4.Future<_i2.Either<_i5.Failure, List<_i6.Currency>>>);
+          as _i4.Future<_i2.Either<_i5.Failure, _i6.CurrencyResult>>);
 
   @override
   _i4.Future<_i2.Either<_i5.Failure, void>> cacheCurrencies(
-    List<_i6.Currency>? currencies,
+    List<_i7.Currency>? currencies,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#cacheCurrencies, [currencies]),

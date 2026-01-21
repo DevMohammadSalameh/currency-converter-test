@@ -1,4 +1,3 @@
-import 'package:currency_converter/core/usecases/usecase.dart';
 import 'package:currency_converter/features/converter/data/models/currency.dart';
 import 'package:currency_converter/features/converter/domain/usecases/get_currencies.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,6 +25,7 @@ class CurrenciesConverterBloc
     on<ResetConverter>(_onResetConverter);
     on<LoadCurrencies>(_onLoadCurrencies);
     on<RefreshCurrencies>(_onRefreshCurrencies);
+    on<ForceRefreshCurrencies>(_onForceRefreshCurrencies);
     on<SearchCurrencies>(_onSearchCurrencies);
     on<ReorderCurrencies>(_onReorderCurrencies);
     on<SelectCurrency>(_onSelectCurrency);
@@ -60,7 +60,7 @@ class CurrenciesConverterBloc
       ),
     );
 
-    final result = await getCurrencies(NoParams());
+    final result = await getCurrencies(const GetCurrenciesParams());
 
     result.fold(
       (failure) => emit(
@@ -69,11 +69,11 @@ class CurrenciesConverterBloc
           currencyListError: failure.message,
         ),
       ),
-      (currencies) {
+      (currencyResult) {
         // Initialize displayed currencies if empty
         List<Currency> displayed = state.displayedCurrencies;
         if (displayed.isEmpty) {
-          displayed = currencies
+          displayed = currencyResult.currencies
               .where((c) => defaultDisplayedCurrencyIds.contains(c.id))
               .toList();
         }
@@ -81,10 +81,11 @@ class CurrenciesConverterBloc
         emit(
           state.copyWith(
             currencyListStatus: CurrencyListStatus.loaded,
-            currencies: currencies,
-            filteredCurrencies: currencies,
+            currencies: currencyResult.currencies,
+            filteredCurrencies: currencyResult.currencies,
             displayedCurrencies: displayed,
             lastUpdated: DateTime.now(),
+            dataSource: currencyResult.source,
             selectedCurrency: displayed.isNotEmpty ? displayed.first : null,
           ),
         );
@@ -175,7 +176,7 @@ class CurrenciesConverterBloc
     RefreshCurrencies event,
     Emitter<CurrenciesConverterState> emit,
   ) async {
-    final result = await getCurrencies(NoParams());
+    final result = await getCurrencies(const GetCurrenciesParams());
 
     result.fold(
       (failure) {
@@ -189,13 +190,66 @@ class CurrenciesConverterBloc
           );
         }
       },
-      (currencies) {
-        final filtered = _filterCurrencies(currencies, state.searchQuery);
+      (currencyResult) {
+        final filtered = _filterCurrencies(
+          currencyResult.currencies,
+          state.searchQuery,
+        );
         emit(
           state.copyWith(
             currencyListStatus: CurrencyListStatus.loaded,
-            currencies: currencies,
+            currencies: currencyResult.currencies,
             filteredCurrencies: filtered,
+            dataSource: currencyResult.source,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onForceRefreshCurrencies(
+    ForceRefreshCurrencies event,
+    Emitter<CurrenciesConverterState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        currencyListStatus: CurrencyListStatus.loading,
+        clearCurrencyListError: true,
+      ),
+    );
+
+    final result = await getCurrencies(
+      const GetCurrenciesParams(forceRefresh: true),
+    );
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          currencyListStatus: CurrencyListStatus.error,
+          currencyListError: failure.message,
+        ),
+      ),
+      (currencyResult) {
+        // Update displayed currencies with new rates from API
+        final updatedDisplayed = state.displayedCurrencies.map((displayed) {
+          try {
+            return currencyResult.currencies.firstWhere(
+              (c) => c.id == displayed.id,
+            );
+          } catch (_) {
+            // Currency not found in fresh data, keep the old one
+            return displayed;
+          }
+        }).toList();
+
+        emit(
+          state.copyWith(
+            currencyListStatus: CurrencyListStatus.loaded,
+            currencies: currencyResult.currencies,
+            filteredCurrencies: currencyResult.currencies,
+            displayedCurrencies: updatedDisplayed,
+            lastUpdated: DateTime.now(),
+            dataSource: currencyResult.source,
           ),
         );
       },

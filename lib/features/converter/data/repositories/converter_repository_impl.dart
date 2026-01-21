@@ -36,6 +36,22 @@ class ConverterRepositoryImpl implements ConverterRepository {
       ));
     }
 
+    // 1. Check cache first - load from database if available
+    final cachedRate = await localDataSource.getCachedRate(
+      fromCurrency: fromCurrency,
+      toCurrency: toCurrency,
+    );
+
+    if (cachedRate != null) {
+      return Right(ConversionResultModel.fromRate(
+        fromCurrency: fromCurrency,
+        toCurrency: toCurrency,
+        amount: amount,
+        rate: cachedRate,
+      ));
+    }
+
+    // 2. Cache miss - fetch from API if online
     if (await networkInfo.isConnected) {
       try {
         final result = await remoteDataSource.convertCurrency(
@@ -44,7 +60,7 @@ class ConverterRepositoryImpl implements ConverterRepository {
           amount: amount,
         );
 
-        // Cache the rate
+        // Cache the rate for future usage
         await localDataSource.cacheRate(
           fromCurrency: fromCurrency,
           toCurrency: toCurrency,
@@ -53,41 +69,14 @@ class ConverterRepositoryImpl implements ConverterRepository {
 
         return Right(result);
       } on ServerException catch (e) {
-        // Try cached rate
-        final cachedRate = await localDataSource.getCachedRate(
-          fromCurrency: fromCurrency,
-          toCurrency: toCurrency,
-        );
-
-        if (cachedRate != null) {
-          return Right(ConversionResultModel.fromRate(
-            fromCurrency: fromCurrency,
-            toCurrency: toCurrency,
-            amount: amount,
-            rate: cachedRate,
-          ));
-        }
-
         return Left(ConversionFailure(e.message));
       }
-    } else {
-      // Offline - use cached rate
-      final cachedRate = await localDataSource.getCachedRate(
-        fromCurrency: fromCurrency,
-        toCurrency: toCurrency,
-      );
-
-      if (cachedRate != null) {
-        return Right(ConversionResultModel.fromRate(
-          fromCurrency: fromCurrency,
-          toCurrency: toCurrency,
-          amount: amount,
-          rate: cachedRate,
-        ));
-      }
-
-      return const Left(NetworkFailure('No internet connection and no cached rate available'));
     }
+
+    // 3. Offline and no cache
+    return const Left(
+      NetworkFailure('No cached rate and no network connection'),
+    );
   }
 
   @override
@@ -99,6 +88,17 @@ class ConverterRepositoryImpl implements ConverterRepository {
       return const Right(1.0);
     }
 
+    // 1. Check cache first - load from database if available
+    final cachedRate = await localDataSource.getCachedRate(
+      fromCurrency: fromCurrency,
+      toCurrency: toCurrency,
+    );
+
+    if (cachedRate != null) {
+      return Right(cachedRate);
+    }
+
+    // 2. Cache miss - fetch from API if online
     if (await networkInfo.isConnected) {
       try {
         final rate = await remoteDataSource.getExchangeRate(
@@ -106,6 +106,7 @@ class ConverterRepositoryImpl implements ConverterRepository {
           toCurrency: toCurrency,
         );
 
+        // Cache the rate for future usage
         await localDataSource.cacheRate(
           fromCurrency: fromCurrency,
           toCurrency: toCurrency,
@@ -114,28 +115,13 @@ class ConverterRepositoryImpl implements ConverterRepository {
 
         return Right(rate);
       } on ServerException catch (e) {
-        final cachedRate = await localDataSource.getCachedRate(
-          fromCurrency: fromCurrency,
-          toCurrency: toCurrency,
-        );
-
-        if (cachedRate != null) {
-          return Right(cachedRate);
-        }
-
         return Left(ServerFailure(e.message));
       }
-    } else {
-      final cachedRate = await localDataSource.getCachedRate(
-        fromCurrency: fromCurrency,
-        toCurrency: toCurrency,
-      );
-
-      if (cachedRate != null) {
-        return Right(cachedRate);
-      }
-
-      return const Left(NetworkFailure('No internet connection'));
     }
+
+    // 3. Offline and no cache
+    return const Left(
+      NetworkFailure('No cached rate and no network connection'),
+    );
   }
 }
