@@ -19,6 +19,7 @@ dependencies:
 
   # Dependency Injection
   get_it: ^8.0.3
+  injectable: ^2.5.0
 
   # Networking
   dio: ^5.7.0
@@ -50,6 +51,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   mockito: ^5.4.4
   build_runner: ^2.4.13
+  injectable_generator: ^2.6.3
   bloc_test: ^9.1.7
 
 flutter:

@@ -5,11 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'features/converter/presentation/bloc/currencies_converter_bloc.dart';
 import 'features/converter/presentation/view/converter_view.dart';
 import 'features/history/presentation/bloc/history_bloc.dart';
-import 'injection_container.dart' as di;
+import 'injection_container.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await di.init();
+  await configureDependencies();
   runApp(const CurrencyConverterApp());
 }
 
@@ -22,10 +22,10 @@ class CurrencyConverterApp extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (_) =>
-              di.sl<CurrenciesConverterBloc>()..add(const LoadCurrencies()),
+              sl<CurrenciesConverterBloc>()..add(const LoadCurrencies()),
         ),
 
-        BlocProvider(create: (_) => di.sl<HistoryBloc>()),
+        BlocProvider(create: (_) => sl<HistoryBloc>()),
       ],
       child: MaterialApp(
         title: 'Currency Converter',

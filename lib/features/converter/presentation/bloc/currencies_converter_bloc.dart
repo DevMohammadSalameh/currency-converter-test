@@ -1,12 +1,14 @@
 import 'package:currency_converter/features/converter/data/models/currency.dart';
 import 'package:currency_converter/features/converter/domain/usecases/get_currencies.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/storage/app_preferences.dart';
 import '../../domain/usecases/convert_currency.dart';
 import 'currencies_converter_event.dart';
 import 'converter_state.dart';
 
+@injectable
 class CurrenciesConverterBloc
     extends Bloc<CurrenciesConverterEvent, CurrenciesConverterState> {
   final ConvertCurrency convertCurrency;

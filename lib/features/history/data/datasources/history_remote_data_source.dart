@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../models/historical_rate_model.dart';
@@ -12,6 +13,7 @@ abstract class HistoryRemoteDataSource {
   });
 }
 
+@LazySingleton(as: HistoryRemoteDataSource)
 class HistoryRemoteDataSourceImpl implements HistoryRemoteDataSource {
   final Dio dio;
 

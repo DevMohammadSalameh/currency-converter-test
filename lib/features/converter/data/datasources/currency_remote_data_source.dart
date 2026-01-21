@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/endpoints.dart';
 import '../../../../core/error/exceptions.dart';
@@ -8,6 +9,7 @@ abstract class CurrencyRemoteDataSource {
   Future<List<CurrencyModel>> getCurrencies();
 }
 
+@LazySingleton(as: CurrencyRemoteDataSource)
 class CurrencyRemoteDataSourceImpl implements CurrencyRemoteDataSource {
   final Dio dio;
 
@@ -16,9 +18,7 @@ class CurrencyRemoteDataSourceImpl implements CurrencyRemoteDataSource {
   @override
   Future<List<CurrencyModel>> getCurrencies() async {
     try {
-      // Fetch rates and names in parallel
       final results = await Future.wait([
-        //TODO : add get last currency From cach
         dio.get(Endpoints.currencies()),
         dio.get(Endpoints.flagCodesUrl),
       ]);

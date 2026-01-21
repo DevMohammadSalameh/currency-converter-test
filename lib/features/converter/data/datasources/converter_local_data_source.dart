@@ -1,3 +1,4 @@
+import 'package:injectable/injectable.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../../core/constants/database_constants.dart';
@@ -16,6 +17,7 @@ abstract class ConverterLocalDataSource {
   });
 }
 
+@LazySingleton(as: ConverterLocalDataSource)
 class ConverterLocalDataSourceImpl implements ConverterLocalDataSource {
   final Database database;
 

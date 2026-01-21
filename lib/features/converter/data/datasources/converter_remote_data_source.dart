@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/network/endpoints.dart';
 import '../../../../core/error/exceptions.dart';
@@ -17,6 +18,7 @@ abstract class ConverterRemoteDataSource {
   });
 }
 
+@LazySingleton(as: ConverterRemoteDataSource)
 class ConverterRemoteDataSourceImpl implements ConverterRemoteDataSource {
   final Dio dio;
 

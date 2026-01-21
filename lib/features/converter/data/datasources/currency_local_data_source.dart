@@ -1,3 +1,4 @@
+import 'package:injectable/injectable.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../../core/constants/database_constants.dart';
@@ -10,6 +11,7 @@ abstract class CurrencyLocalDataSource {
   Future<bool> hasCachedCurrencies();
 }
 
+@LazySingleton(as: CurrencyLocalDataSource)
 class CurrencyLocalDataSourceImpl implements CurrencyLocalDataSource {
   final Database database;
 

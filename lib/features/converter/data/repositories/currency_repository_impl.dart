@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/enums/data_source.dart';
 import '../../../../core/error/exceptions.dart';
@@ -11,6 +12,7 @@ import '../datasources/currency_local_data_source.dart';
 import '../datasources/currency_remote_data_source.dart';
 import '../models/currency_model.dart';
 
+@LazySingleton(as: CurrencyRepository)
 class CurrencyRepositoryImpl implements CurrencyRepository {
   final CurrencyRemoteDataSource remoteDataSource;
   final CurrencyLocalDataSource localDataSource;

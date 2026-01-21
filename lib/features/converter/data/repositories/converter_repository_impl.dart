@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -9,6 +10,7 @@ import '../datasources/converter_local_data_source.dart';
 import '../datasources/converter_remote_data_source.dart';
 import '../models/conversion_result_model.dart';
 
+@LazySingleton(as: ConverterRepository)
 class ConverterRepositoryImpl implements ConverterRepository {
   final ConverterRemoteDataSource remoteDataSource;
   final ConverterLocalDataSource localDataSource;

@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -8,6 +9,7 @@ import '../../domain/repositories/history_repository.dart';
 import '../datasources/history_local_data_source.dart';
 import '../datasources/history_remote_data_source.dart';
 
+@LazySingleton(as: HistoryRepository)
 class HistoryRepositoryImpl implements HistoryRepository {
   final HistoryRemoteDataSource remoteDataSource;
   final HistoryLocalDataSource localDataSource;

@@ -1,3 +1,4 @@
+import 'package:injectable/injectable.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../../core/constants/database_constants.dart';
@@ -15,6 +16,7 @@ abstract class HistoryLocalDataSource {
   Future<void> cacheHistoricalRates(List<HistoricalRateModel> rates);
 }
 
+@LazySingleton(as: HistoryLocalDataSource)
 class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
   final Database database;
 

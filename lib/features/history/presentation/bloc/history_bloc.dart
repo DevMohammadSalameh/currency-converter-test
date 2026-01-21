@@ -1,9 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../domain/usecases/get_historical_rates.dart';
 import 'history_event.dart';
 import 'history_state.dart';
 
+@injectable
 class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   final GetHistoricalRates getHistoricalRates;
 
