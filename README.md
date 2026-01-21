@@ -26,7 +26,7 @@ lib/
 │   ├── currencies/                # Currency listing feature
 │   │   ├── data/                  # Data sources, models, repository impl
 │   │   ├── domain/                # Entities, repository contracts, use cases
-│   │   └── presentation/          # BLoC, pages, widgets
+│   │   └── presentation/          # BLoC, views, widgets
 │   ├── converter/                 # Currency conversion feature
 │   │   ├── data/
 │   │   ├── domain/
@@ -150,7 +150,7 @@ Each feature follows the same structure:
 
 **Presentation Layer**:
 - BLoC (events, states, bloc)
-- Pages (UI screens)
+- Views (UI screens)
 - Widgets (reusable components)
 
 ## License

@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../../currencies/domain/entities/currency.dart';
+import '../../data/models/currency.dart';
 
 class CurrencySelector extends StatelessWidget {
   final Currency? selectedCurrency;
@@ -111,11 +111,8 @@ class CurrencySelector extends StatelessWidget {
         width: 48,
         height: 36,
         fit: BoxFit.cover,
-        placeholder: (context, url) => Container(
-          width: 48,
-          height: 36,
-          color: Colors.grey[300],
-        ),
+        placeholder: (context, url) =>
+            Container(width: 48, height: 36, color: Colors.grey[300]),
         errorWidget: (context, url, error) => Container(
           width: 48,
           height: 36,

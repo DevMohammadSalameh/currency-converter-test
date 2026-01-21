@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../../core/constants/api_constants.dart';
+import '../../../../core/network/endpoints.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/conversion_result_model.dart';
 
@@ -52,8 +52,9 @@ class ConverterRemoteDataSourceImpl implements ConverterRemoteDataSource {
     required String toCurrency,
   }) async {
     try {
+      //TODO this will be calculated not fetched from API
       final response = await dio.get(
-        '${ApiConstants.baseUrl}${ApiConstants.latestEndpoint}',
+        Endpoints.currencies(currency: fromCurrency),
       );
 
       if (response.statusCode == 200) {

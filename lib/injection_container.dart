@@ -3,17 +3,16 @@ import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'core/constants/api_constants.dart';
+import 'core/network/endpoints.dart';
 import 'core/database/database_helper.dart';
 import 'core/network/network_info.dart';
 
 // Currencies feature
-import 'features/currencies/data/datasources/currency_local_data_source.dart';
-import 'features/currencies/data/datasources/currency_remote_data_source.dart';
-import 'features/currencies/data/repositories/currency_repository_impl.dart';
-import 'features/currencies/domain/repositories/currency_repository.dart';
-import 'features/currencies/domain/usecases/get_currencies.dart';
-import 'features/currencies/presentation/bloc/currencies_bloc.dart';
+import 'features/converter/data/datasources/currency_local_data_source.dart';
+import 'features/converter/data/datasources/currency_remote_data_source.dart';
+import 'features/converter/data/repositories/currency_repository_impl.dart';
+import 'features/converter/domain/repositories/currency_repository.dart';
+import 'features/converter/domain/usecases/get_currencies.dart';
 
 // Converter feature
 import 'features/converter/data/datasources/converter_local_data_source.dart';
@@ -21,7 +20,7 @@ import 'features/converter/data/datasources/converter_remote_data_source.dart';
 import 'features/converter/data/repositories/converter_repository_impl.dart';
 import 'features/converter/domain/repositories/converter_repository.dart';
 import 'features/converter/domain/usecases/convert_currency.dart';
-import 'features/converter/presentation/bloc/converter_bloc.dart';
+import 'features/converter/presentation/bloc/currencies_converter_bloc.dart';
 
 // History feature
 import 'features/history/data/datasources/history_local_data_source.dart';
@@ -39,18 +38,15 @@ Future<void> init() async {
   sl.registerLazySingleton<Database>(() => database);
 
   sl.registerLazySingleton<Dio>(() {
-    final dio = Dio(BaseOptions(
-      connectTimeout: ApiConstants.connectTimeout,
-      receiveTimeout: ApiConstants.receiveTimeout,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    ));
+    final dio = Dio(
+      BaseOptions(
+        connectTimeout: Endpoints.connectTimeout,
+        receiveTimeout: Endpoints.receiveTimeout,
+        headers: {'Content-Type': 'application/json'},
+      ),
+    );
 
-    dio.interceptors.add(LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-    ));
+    dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
 
     return dio;
   });
@@ -58,9 +54,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => InternetConnectionChecker.instance);
 
   // ==================== Core ====================
-  sl.registerLazySingleton<NetworkInfo>(
-    () => NetworkInfoImpl(sl()),
-  );
+  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
 
   // ==================== Features ====================
   _initCurrenciesFeature();
@@ -71,7 +65,7 @@ Future<void> init() async {
 void _initCurrenciesFeature() {
   // Bloc
   sl.registerFactory(
-    () => CurrenciesBloc(getCurrencies: sl()),
+    () => CurrenciesConverterBloc(getCurrencies: sl(), convertCurrency: sl()),
   );
 
   // Use cases
@@ -97,11 +91,6 @@ void _initCurrenciesFeature() {
 }
 
 void _initConverterFeature() {
-  // Bloc
-  sl.registerFactory(
-    () => ConverterBloc(convertCurrency: sl()),
-  );
-
   // Use cases
   sl.registerLazySingleton(() => ConvertCurrency(sl()));
 
@@ -126,9 +115,7 @@ void _initConverterFeature() {
 
 void _initHistoryFeature() {
   // Bloc
-  sl.registerFactory(
-    () => HistoryBloc(getHistoricalRates: sl()),
-  );
+  sl.registerFactory(() => HistoryBloc(getHistoricalRates: sl()));
 
   // Use cases
   sl.registerLazySingleton(() => GetHistoricalRates(sl()));
