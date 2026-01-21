@@ -29,6 +29,8 @@ class CurrenciesConverterBloc
     on<SearchCurrencies>(_onSearchCurrencies);
     on<ReorderCurrencies>(_onReorderCurrencies);
     on<SelectCurrency>(_onSelectCurrency);
+    on<AddCurrencyToDisplayed>(_onAddCurrencyToDisplayed);
+    on<RemoveCurrencyFromDisplayed>(_onRemoveCurrencyFromDisplayed);
   }
 
   void _onSelectCurrency(
@@ -90,6 +92,39 @@ class CurrenciesConverterBloc
     reordered.insert(event.newIndex, item);
 
     emit(state.copyWith(displayedCurrencies: reordered));
+  }
+
+  void _onAddCurrencyToDisplayed(
+    AddCurrencyToDisplayed event,
+    Emitter<CurrenciesConverterState> emit,
+  ) {
+    // Check if currency already exists in displayed list
+    if (state.displayedCurrencies.any((c) => c.id == event.currency.id)) {
+      return;
+    }
+
+    final List<Currency> updated = [...state.displayedCurrencies, event.currency];
+    emit(state.copyWith(displayedCurrencies: updated));
+  }
+
+  void _onRemoveCurrencyFromDisplayed(
+    RemoveCurrencyFromDisplayed event,
+    Emitter<CurrenciesConverterState> emit,
+  ) {
+    final List<Currency> updated = state.displayedCurrencies
+        .where((c) => c.id != event.currency.id)
+        .toList();
+
+    // Update selected currency if the removed one was selected
+    Currency? newSelected = state.selectedCurrency;
+    if (state.selectedCurrency?.id == event.currency.id) {
+      newSelected = updated.isNotEmpty ? updated.first : null;
+    }
+
+    emit(state.copyWith(
+      displayedCurrencies: updated,
+      selectedCurrency: newSelected,
+    ));
   }
 
   Future<void> _onRefreshCurrencies(

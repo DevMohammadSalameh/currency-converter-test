@@ -28,7 +28,7 @@ class CurrencyListItem extends StatelessWidget {
           boxShadow: [
             if (isSelected)
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),

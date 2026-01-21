@@ -83,3 +83,21 @@ class ReorderCurrencies extends CurrenciesConverterEvent {
   @override
   List<Object?> get props => [oldIndex, newIndex];
 }
+
+class AddCurrencyToDisplayed extends CurrenciesConverterEvent {
+  final Currency currency;
+
+  const AddCurrencyToDisplayed(this.currency);
+
+  @override
+  List<Object?> get props => [currency];
+}
+
+class RemoveCurrencyFromDisplayed extends CurrenciesConverterEvent {
+  final Currency currency;
+
+  const RemoveCurrencyFromDisplayed(this.currency);
+
+  @override
+  List<Object?> get props => [currency];
+}

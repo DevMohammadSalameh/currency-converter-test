@@ -4,13 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/gradient_scaffold.dart';
-// import 'currency_list_view.dart';
-// import '../bloc/currencies_converter_event.dart';
+import 'currency_list_view.dart';
 import '../bloc/currencies_converter_bloc.dart';
+import '../bloc/currencies_converter_event.dart';
 import '../bloc/converter_state.dart';
-// import '../widgets/amount_input.dart';
-// import '../widgets/conversion_result_card.dart';
-// import '../widgets/currency_selector.dart';
 
 class ConverterView extends StatefulWidget {
   const ConverterView({super.key});
@@ -34,6 +31,7 @@ class _ConverterViewState extends State<ConverterView> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Currency Converter', style: TextStyle(fontSize: 18)),
+        scrolledUnderElevation: 0,
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -96,10 +94,39 @@ class _ConverterViewState extends State<ConverterView> {
                             ),
                           ),
                         const CurrenciesList(),
-                        //Add currency button
+                        const SizedBox(height: 16),
                         Row(
                           children: [
-                            ,
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(32),
+                                border: Border.all(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withValues(alpha: 0.2),
+                                ),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withValues(alpha: 0.1),
+                              ),
+                              child: TextButton.icon(
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary,
+                                ),
+                                onPressed: () =>
+                                    _navigateToCurrencyList(context),
+                                icon: const Icon(Icons.add),
+                                label: const Text('Add'),
+                              ),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              onPressed: () => _showInfoSnackBar(context),
+                              icon: const Icon(Icons.info_outline),
+                              tooltip: 'Info',
+                            ),
                           ],
                         ),
                         // AmountInput(
@@ -185,6 +212,39 @@ class _ConverterViewState extends State<ConverterView> {
       const SnackBar(
         content: Text(
           'This feature is not implemented yet, Hire me to see the full app',
+        ),
+      ),
+    );
+  }
+
+  void _showInfoSnackBar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Long press and drag to reorder.\nSwipe left to delete.',
+        ),
+      ),
+    );
+  }
+
+  void _navigateToCurrencyList(BuildContext context) {
+    final bloc = context.read<CurrenciesConverterBloc>();
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: bloc,
+          child: CurrencyListView(
+            title: 'Add Currency',
+            onCurrencySelected: (currency) {
+              // Add currency to displayed list
+              final currentDisplayed = List.of(bloc.state.displayedCurrencies);
+              if (!currentDisplayed.any((c) => c.id == currency.id)) {
+                bloc.add(AddCurrencyToDisplayed(currency));
+              }
+              Navigator.of(context).pop();
+            },
+          ),
         ),
       ),
     );

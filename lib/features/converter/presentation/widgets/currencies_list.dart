@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/models/currency.dart';
 import '../bloc/converter_state.dart';
 import '../bloc/currencies_converter_bloc.dart';
 import '../bloc/currencies_converter_event.dart';
@@ -27,7 +28,6 @@ class CurrenciesList extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: currencies.length,
           onReorder: (oldIndex, newIndex) {
-            // Adjust newIndex when moving down
             if (newIndex > oldIndex) {
               newIndex -= 1;
             }
@@ -37,7 +37,7 @@ class CurrenciesList extends StatelessWidget {
           },
           itemBuilder: (context, index) {
             final currency = currencies[index];
-            return CurrencyListItem(
+            return _DismissibleCurrencyItem(
               key: ValueKey(currency.id),
               currency: currency,
               isSelected: state.selectedCurrency == currency,
@@ -45,6 +45,47 @@ class CurrenciesList extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _DismissibleCurrencyItem extends StatelessWidget {
+  const _DismissibleCurrencyItem({
+    super.key,
+    required this.currency,
+    required this.isSelected,
+  });
+
+  final Currency currency;
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dismissible(
+      key: ValueKey('dismissible_${currency.id}'),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(
+          Icons.delete,
+          color: Colors.white,
+        ),
+      ),
+      onDismissed: (_) {
+        context.read<CurrenciesConverterBloc>().add(
+          RemoveCurrencyFromDisplayed(currency),
+        );
+      },
+      child: CurrencyListItem(
+        currency: currency,
+        isSelected: isSelected,
+      ),
     );
   }
 }
