@@ -31,6 +31,7 @@ class CurrenciesConverterBloc
     on<SelectCurrency>(_onSelectCurrency);
     on<AddCurrencyToDisplayed>(_onAddCurrencyToDisplayed);
     on<RemoveCurrencyFromDisplayed>(_onRemoveCurrencyFromDisplayed);
+    on<ReplaceCurrencyInDisplayed>(_onReplaceCurrencyInDisplayed);
     // Rate editing events
     on<StartEditingRate>(_onStartEditingRate);
     on<CancelEditingRate>(_onCancelEditingRate);
@@ -132,6 +133,41 @@ class CurrenciesConverterBloc
     emit(state.copyWith(
       displayedCurrencies: updated,
       selectedCurrency: newSelected,
+    ));
+  }
+
+  void _onReplaceCurrencyInDisplayed(
+    ReplaceCurrencyInDisplayed event,
+    Emitter<CurrenciesConverterState> emit,
+  ) {
+    // Find the index of the old currency
+    final index = state.displayedCurrencies.indexWhere(
+      (c) => c.id == event.oldCurrency.id,
+    );
+
+    if (index == -1) return;
+
+    // Check if new currency already exists in the list
+    final existingIndex = state.displayedCurrencies.indexWhere(
+      (c) => c.id == event.newCurrency.id,
+    );
+
+    List<Currency> updated;
+    if (existingIndex != -1 && existingIndex != index) {
+      // New currency already exists, swap positions
+      updated = List.from(state.displayedCurrencies);
+      updated[index] = event.newCurrency;
+      updated[existingIndex] = event.oldCurrency;
+    } else {
+      // Replace old currency with new one at the same position
+      updated = List.from(state.displayedCurrencies);
+      updated[index] = event.newCurrency;
+    }
+
+    // Update selected currency to the new one
+    emit(state.copyWith(
+      displayedCurrencies: updated,
+      selectedCurrency: event.newCurrency,
     ));
   }
 

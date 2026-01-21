@@ -102,6 +102,16 @@ class RemoveCurrencyFromDisplayed extends CurrenciesConverterEvent {
   List<Object?> get props => [currency];
 }
 
+class ReplaceCurrencyInDisplayed extends CurrenciesConverterEvent {
+  final Currency oldCurrency;
+  final Currency newCurrency;
+
+  const ReplaceCurrencyInDisplayed(this.oldCurrency, this.newCurrency);
+
+  @override
+  List<Object?> get props => [oldCurrency, newCurrency];
+}
+
 // Rate editing events
 class StartEditingRate extends CurrenciesConverterEvent {
   const StartEditingRate();

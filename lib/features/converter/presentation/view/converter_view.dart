@@ -197,7 +197,7 @@ class _ConverterViewState extends State<ConverterView> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
-          '- Long press and drag to reorder.\n- Swipe left to delete.\n- Click on the selected currency to edit the rate and convert.',
+          '- Long press and drag to reorder.\n- Swipe left to delete.\n- Click on the selected currency to edit the rate and convert.\n- Click on the add button to add a new currency.\n- Click on the replace button to replace the selected currency with another currency.',
         ),
       ),
     );

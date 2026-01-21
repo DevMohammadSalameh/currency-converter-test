@@ -11,12 +11,14 @@ class CurrencyListItem extends StatelessWidget {
     required this.isSelected,
     this.isEditing = false,
     this.selectedCurrency,
+    this.onReplace,
   });
 
   final Currency currency;
   final bool isSelected;
   final bool isEditing;
   final Currency? selectedCurrency;
+  final VoidCallback? onReplace;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +62,24 @@ class CurrencyListItem extends StatelessWidget {
               currency.id,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
+            if (isSelected && onReplace != null) ...[
+              const SizedBox(width: 4),
+              GestureDetector(
+                onTap: onReplace,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.swap_horiz,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+            ],
             const Spacer(),
             _buildRateColumn(context),
             //Vertical Divider

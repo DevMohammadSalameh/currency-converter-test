@@ -5,7 +5,28 @@ import '../../data/models/currency.dart';
 import '../bloc/converter_state.dart';
 import '../bloc/currencies_converter_bloc.dart';
 import '../bloc/currencies_converter_event.dart';
+import '../view/currency_list_view.dart';
 import 'currency_list_item.dart';
+
+void _navigateToReplaceCurrency(BuildContext context, Currency oldCurrency) {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => BlocProvider.value(
+        value: context.read<CurrenciesConverterBloc>(),
+        child: CurrencyListView(
+          title: 'Replace ${oldCurrency.id}',
+          selectedCurrency: oldCurrency,
+          onCurrencySelected: (newCurrency) {
+            context.read<CurrenciesConverterBloc>().add(
+              ReplaceCurrencyInDisplayed(oldCurrency, newCurrency),
+            );
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
+    ),
+  );
+}
 
 class CurrenciesList extends StatelessWidget {
   const CurrenciesList({super.key});
@@ -38,12 +59,16 @@ class CurrenciesList extends StatelessWidget {
           },
           itemBuilder: (context, index) {
             final currency = currencies[index];
+            final isSelected = state.selectedCurrency?.id == currency.id;
             return _DismissibleCurrencyItem(
               key: ValueKey(currency.id),
               currency: currency,
-              isSelected: state.selectedCurrency?.id == currency.id,
+              isSelected: isSelected,
               isEditing: state.isEditingRate,
               selectedCurrency: state.selectedCurrency,
+              onReplace: isSelected
+                  ? () => _navigateToReplaceCurrency(context, currency)
+                  : null,
             );
           },
         );
@@ -59,12 +84,14 @@ class _DismissibleCurrencyItem extends StatelessWidget {
     required this.isSelected,
     required this.isEditing,
     this.selectedCurrency,
+    this.onReplace,
   });
 
   final Currency currency;
   final bool isSelected;
   final bool isEditing;
   final Currency? selectedCurrency;
+  final VoidCallback? onReplace;
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +121,7 @@ class _DismissibleCurrencyItem extends StatelessWidget {
         isSelected: isSelected,
         isEditing: isEditing,
         selectedCurrency: selectedCurrency,
+        onReplace: onReplace,
       ),
     );
   }
