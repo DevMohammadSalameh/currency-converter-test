@@ -23,6 +23,7 @@ class ConverterView extends StatefulWidget {
 
 class _ConverterViewState extends State<ConverterView> {
   final _amountController = TextEditingController();
+  bool _isLoadingDialogShowing = false;
 
   @override
   void dispose() {
@@ -54,9 +55,16 @@ class _ConverterViewState extends State<ConverterView> {
         ],
       ),
       body: BlocConsumer<CurrenciesConverterBloc, CurrenciesConverterState>(
+        listenWhen: (previous, current) {
+          // Only listen when currencyListStatus or converter status changes
+          return previous.currencyListStatus != current.currencyListStatus ||
+              previous.status != current.status;
+        },
         listener: (context, state) {
           // Show loading dialog when currency list is loading
-          if (state.currencyListStatus == CurrencyListStatus.loading) {
+          if (state.currencyListStatus == CurrencyListStatus.loading &&
+              !_isLoadingDialogShowing) {
+            _isLoadingDialogShowing = true;
             showDialog(
               context: context,
               barrierDismissible: false,
@@ -75,13 +83,15 @@ class _ConverterViewState extends State<ConverterView> {
                   ),
                 ),
               ),
-            );
-          } else if (state.currencyListStatus == CurrencyListStatus.loaded ||
-              state.currencyListStatus == CurrencyListStatus.error) {
-            // Dismiss loading dialog if it's showing
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
-            }
+            ).then((_) {
+              _isLoadingDialogShowing = false;
+            });
+          } else if ((state.currencyListStatus == CurrencyListStatus.loaded ||
+                  state.currencyListStatus == CurrencyListStatus.error) &&
+              _isLoadingDialogShowing) {
+            // Dismiss loading dialog only if we showed it
+            _isLoadingDialogShowing = false;
+            Navigator.of(context).pop();
           }
 
           if (state.status == ConverterStatus.failure &&

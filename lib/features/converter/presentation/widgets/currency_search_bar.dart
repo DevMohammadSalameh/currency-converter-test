@@ -4,11 +4,7 @@ class CurrencySearchBar extends StatefulWidget {
   final ValueChanged<String> onChanged;
   final String? hintText;
 
-  const CurrencySearchBar({
-    super.key,
-    required this.onChanged,
-    this.hintText,
-  });
+  const CurrencySearchBar({super.key, required this.onChanged, this.hintText});
 
   @override
   State<CurrencySearchBar> createState() => _CurrencySearchBarState();
@@ -27,8 +23,6 @@ class _CurrencySearchBarState extends State<CurrencySearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Padding(
       padding: const EdgeInsets.all(16),
       child: TextField(
@@ -49,7 +43,7 @@ class _CurrencySearchBarState extends State<CurrencySearchBar> {
                 )
               : null,
           filled: true,
-          fillColor: theme.colorScheme.surfaceContainerHighest,
+          fillColor: Colors.white60,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,

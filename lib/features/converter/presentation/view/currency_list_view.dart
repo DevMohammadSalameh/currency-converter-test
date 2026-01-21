@@ -24,16 +24,23 @@ class CurrencyListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GradientScaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(title ?? 'Currencies'),
         centerTitle: true,
+        scrolledUnderElevation: 0,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        toolbarHeight: 80,
       ),
       body: BlocBuilder<CurrenciesConverterBloc, CurrenciesConverterState>(
         builder: (context, state) {
           return Column(
             children: [
+              const ColoredBox(
+                color: Colors.green,
+                child: SizedBox(height: 80),
+              ),
               CurrencySearchBar(
                 onChanged: (query) {
                   context.read<CurrenciesConverterBloc>().add(
@@ -81,6 +88,7 @@ class CurrencyListView extends StatelessWidget {
         context.read<CurrenciesConverterBloc>().add(const RefreshCurrencies());
       },
       child: ListView.separated(
+        padding: EdgeInsets.zero,
         itemCount: state.filteredCurrencies.length,
         separatorBuilder: (context, index) => const Divider(height: 1),
         itemBuilder: (context, index) {

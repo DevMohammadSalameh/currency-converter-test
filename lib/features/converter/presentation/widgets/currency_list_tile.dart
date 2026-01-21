@@ -28,15 +28,9 @@ class CurrencyListTile extends StatelessWidget {
       ),
       leading: _buildFlag(),
       title: Text(
-        currency.name,
+        '${currency.name} - ${currency.id}',
         style: theme.textTheme.bodyLarge?.copyWith(
           fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
-      subtitle: Text(
-        currency.id,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
         ),
       ),
       trailing: currency.symbol != null
