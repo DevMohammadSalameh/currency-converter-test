@@ -99,12 +99,40 @@ class _ConverterViewState extends State<ConverterView> {
             Navigator.of(context).pop();
           }
 
+          // Show error snackbar for conversion failures
           if (state.status == ConverterStatus.failure &&
               state.errorMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.errorMessage!),
                 backgroundColor: Theme.of(context).colorScheme.error,
+              ),
+            );
+          }
+
+          // Show error snackbar for currency list fetch failures
+          if (state.currencyListStatus == CurrencyListStatus.error &&
+              state.currencyListError != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.wifi_off, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(state.currencyListError!)),
+                  ],
+                ),
+                backgroundColor: Theme.of(context).colorScheme.error,
+                duration: const Duration(seconds: 2),
+                action: SnackBarAction(
+                  label: 'Retry',
+                  textColor: Colors.white,
+                  onPressed: () {
+                    context.read<CurrenciesConverterBloc>().add(
+                      const LoadCurrencies(),
+                    );
+                  },
+                ),
               ),
             );
           }
@@ -126,50 +154,8 @@ class _ConverterViewState extends State<ConverterView> {
                           physics: const AlwaysScrollableScrollPhysics(),
                           child: Column(
                             children: [
-                              if (state.lastUpdated != null)
-                                // Last Time Updated with Data Source Icon
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.access_time,
-                                        size: 16,
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'Last Time Updated: ${_formatTime(state.lastUpdated!)}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      // Data Source Icon
-                                      if (state.dataSource != null)
-                                        Tooltip(
-                                          message:
-                                              state.dataSource == DataSource.api
-                                              ? 'Fetched from API'
-                                              : 'Loaded from local database',
-                                          child: Icon(
-                                            state.dataSource == DataSource.api
-                                                ? Icons.cloud_download
-                                                : Icons.storage,
-                                            size: 16,
-                                            color:
-                                                state.dataSource ==
-                                                    DataSource.api
-                                                ? Theme.of(context).colorScheme.primary
-                                                : Theme.of(context).colorScheme.tertiary,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
+                              // Status row: show error or last updated time
+                              _buildStatusRow(context, state),
                               const CurrenciesList(),
                               const SizedBox(height: 16),
                               Row(
@@ -203,7 +189,9 @@ class _ConverterViewState extends State<ConverterView> {
                                     'Click to view usage guide',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                   // Info Button
@@ -232,7 +220,9 @@ class _ConverterViewState extends State<ConverterView> {
                       );
                     },
                     child: Container(
-                      color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.3),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.scrim.withValues(alpha: 0.3),
                     ),
                   ),
                 ),
@@ -339,6 +329,105 @@ class _ConverterViewState extends State<ConverterView> {
     //     ),
     //   ),
     // );
+  }
+
+  Widget _buildStatusRow(BuildContext context, CurrenciesConverterState state) {
+    // Show error state
+    if (state.hasCurrencyListError && state.currencyListError != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.errorContainer,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.wifi_off,
+                size: 16,
+                color: Theme.of(context).colorScheme.onErrorContainer,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'No internet connection',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  context.read<CurrenciesConverterBloc>().add(
+                    const LoadCurrencies(),
+                  );
+                },
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'Retry',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Show last updated time
+    if (state.lastUpdated != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Icon(
+              Icons.access_time,
+              size: 16,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Last Time Updated: ${_formatTime(state.lastUpdated!)}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Data Source Icon
+            if (state.dataSource != null)
+              Tooltip(
+                message: state.dataSource == DataSource.api
+                    ? 'Fetched from API'
+                    : 'Loaded from local database',
+                child: Icon(
+                  state.dataSource == DataSource.api
+                      ? Icons.cloud_download
+                      : Icons.storage,
+                  size: 16,
+                  color: state.dataSource == DataSource.api
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.tertiary,
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+
+    // Nothing to show
+    return const SizedBox.shrink();
   }
 
   String _formatTime(DateTime time) {

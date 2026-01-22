@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:currency_converter/features/converter/data/models/currency.dart';
 import 'package:currency_converter/features/converter/presentation/bloc/currencies_converter_bloc.dart';
 import 'package:currency_converter/features/converter/presentation/bloc/currencies_converter_event.dart';
@@ -5,6 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CurrencyListItem extends StatelessWidget {
+  // Static RegExp to avoid recompilation on every _formatRate() call
+  static final _trailingZerosRegex = RegExp(r'0+$');
+  static final _trailingDotRegex = RegExp(r'\.$');
+
   const CurrencyListItem({
     super.key,
     required this.currency,
@@ -56,7 +61,46 @@ class CurrencyListItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Image.network(currency.flagUrl, height: 30, width: 30),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: CachedNetworkImage(
+                imageUrl: currency.flagUrl,
+                height: 30,
+                width: 55,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  height: 30,
+                  width: 55,
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  height: 30,
+                  width: 55,
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Center(
+                    child: Text(
+                      currency.id.length >= 2
+                          ? currency.id.substring(0, 2)
+                          : currency.id,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(width: 8),
             Text(
               currency.id,
@@ -189,9 +233,9 @@ class CurrencyListItem extends StatelessWidget {
     }
     // Limit decimal places to 6
     final formatted = rate.toDouble().toStringAsFixed(6);
-    // Remove trailing zeros
+    // Remove trailing zeros using static RegExp (avoids recompilation)
     return formatted
-        .replaceAll(RegExp(r'0+$'), '')
-        .replaceAll(RegExp(r'\.$'), '');
+        .replaceAll(_trailingZerosRegex, '')
+        .replaceAll(_trailingDotRegex, '');
   }
 }
