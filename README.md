@@ -8,6 +8,7 @@ A Flutter currency converter application built with Clean Architecture and BLoC 
 - [Build Instructions](#build-instructions)
 - [Architecture](#architecture)
 - [Image Loading Library](#image-loading-library)
+- [Database](#database)
 - [Tech Stack](#tech-stack)
 - [API](#api)
 - [Testing](#testing)
@@ -102,7 +103,7 @@ This project implements **Clean Architecture** combined with the **BLoC (Busines
 
 #### Why Clean Architecture?
 
-I used this architecture becuse the challenge required it. other wise i would have used **MVVM** or **MVC** for a project in this scale. here are the benifits of using **Clean Architecture** as we all have memorised:
+I used this architecture because the challenge required it. Otherwise I would have used **MVVM** or **MVC** for a project of this scale. Here are the benefits of using **Clean Architecture**:
 
 | Benefit | Description |
 |---------|-------------|
@@ -113,7 +114,8 @@ I used this architecture becuse the challenge required it. other wise i would ha
 | **Dependency Rule** | Dependencies point inward—outer layers depend on inner layers, never the reverse |
 
 #### Why BLoC Pattern?
-i used this pattern becuse its the overall best suited state management pattern for flutter apps. although i would used Cubit for a project in this scale.
+
+I used this pattern because it's the overall best suited state management pattern for Flutter apps. Although I would have used Cubit for a project of this scale.
 
 | Benefit | Description |
 |---------|-------------|
@@ -234,6 +236,47 @@ CachedNetworkImage(
   placeholder: (context, url) => const CircularProgressIndicator(),
   errorWidget: (context, url, error) => const Icon(Icons.flag),
 )
+```
+
+---
+
+## Database
+
+### Library: sqflite
+
+This project uses **[sqflite](https://pub.dev/packages/sqflite)** for local data persistence and offline caching.
+
+#### Why sqflite?
+
+| Reason | Description |
+|--------|-------------|
+| **Native SQLite Access** | Direct access to SQLite database with no abstraction overhead, providing optimal performance |
+| **Offline-First Support** | Enables full CRUD operations without network connectivity, essential for the caching requirement |
+| **Structured Queries** | Full SQL support allows complex queries, joins, and indexing for efficient data retrieval |
+| **Lightweight** | Minimal footprint compared to ORMs, suitable for mobile applications |
+| **Flutter Favorite** | Official Flutter favorite package with excellent documentation and community support |
+| **Platform Support** | Works on iOS, Android, and macOS with consistent API |
+
+#### Alternatives Considered
+
+| Library | Why Not Chosen |
+|---------|----------------|
+| `hive` | NoSQL approach less suitable for relational currency data with rates |
+| `drift` (moor) | Adds complexity with code generation; overkill for simple caching needs |
+| `isar` | Newer library with smaller community; sqflite is more battle-tested |
+| `shared_preferences` | Only suitable for simple key-value pairs, not structured data |
+| `objectbox` | Proprietary elements and larger package size |
+
+#### Usage in Project
+
+The database stores currencies and exchange rates for offline access:
+
+```dart
+// Cache currencies after API fetch
+await localDataSource.cacheCurrencies(currencies);
+
+// Retrieve cached data when offline
+final cachedCurrencies = await localDataSource.getCachedCurrencies();
 ```
 
 ---
